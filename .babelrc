@@ -1,0 +1,9 @@
+{
+	"presets": ["es2015"],
+	"plugins": [
+		"transform-runtime",
+		"babel-plugin-transform-builtin-extend",
+	],
+	"comments": false,
+	"retainLines": true
+}
