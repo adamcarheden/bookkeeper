@@ -87,9 +87,9 @@ declare module 'BookKeeper/JournalEntry' {
     import Period from 'BookKeeper/Period';
     import Account from 'BookKeeper/Account';
     export default class JournalEntry {
-        amount: number;
-        description: string;
-        period: Period;
+        readonly period: Period;
+        readonly description: string;
+        readonly amount: number;
         constructor(coa: ChartOfAccounts, period: Period, description: string, amount: number, debit: Account, credit: Account);
     }
 }
@@ -140,9 +140,9 @@ declare module 'BookKeeper/FinancialStatements' {
     import IncomeStatement from 'BookKeeper/IncomeStatement';
     import BalanceSheet from 'BookKeeper/BalanceSheet';
     export default class FinancialStatements {
-        incomeStatement: IncomeStatement;
-        balanceSheet: BalanceSheet;
-        constructor(is: IncomeStatement, bs: BalanceSheet);
+        readonly incomeStatement: IncomeStatement;
+        readonly balanceSheet: BalanceSheet;
+        constructor(incomeStatement: IncomeStatement, balanceSheet: BalanceSheet);
     }
 }
 

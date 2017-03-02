@@ -10,8 +10,8 @@ export default class Period {
 
 	period: any
 	coa: ChartOfAccounts
-	journal: JournalEntry[]
-	total: number
+	journal: JournalEntry[] = []
+	total: number = 0
 	autoClose: () => never
 	closed: boolean
 	financialStatements: FinancialStatements
@@ -19,8 +19,6 @@ export default class Period {
 	constructor(period: any, coa: ChartOfAccounts, autoClose: boolean) {
 		this.period = period
 		this.coa = coa
-		this.journal = []
-		this.total = 0
 		this.autoClose = typeof autoClose === 'function'
 			? autoClose
 			: function() { throw new Error('You called balanceSheet or incomeStatement prior to closing the period, but you did not provide an autoClose function at instantiation') }

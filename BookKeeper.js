@@ -136,9 +136,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var JournalEntry = (function () {
 	    function JournalEntry(coa, period, description, amount, debit, credit) {
-	        this.amount = amount;
-	        this.description = description;
 	        this.period = period;
+	        this.description = description;
+	        this.amount = amount;
 	        debit.debit(this);
 	        credit.credit(this);
 	        period.logJournalEntry(this);
@@ -160,10 +160,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var FinancialStatements_1 = __webpack_require__(9);
 	var Period = (function () {
 	    function Period(period, coa, autoClose) {
-	        this.period = period;
-	        this.coa = coa;
 	        this.journal = [];
 	        this.total = 0;
+	        this.period = period;
+	        this.coa = coa;
 	        this.autoClose = typeof autoClose === 'function'
 	            ? autoClose
 	            : function () { throw new Error('You called balanceSheet or incomeStatement prior to closing the period, but you did not provide an autoClose function at instantiation'); };
@@ -403,9 +403,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var FinancialStatements = (function () {
-	    function FinancialStatements(is, bs) {
-	        this.incomeStatement = is;
-	        this.balanceSheet = bs;
+	    function FinancialStatements(incomeStatement, balanceSheet) {
+	        this.incomeStatement = incomeStatement;
+	        this.balanceSheet = balanceSheet;
 	    }
 	    return FinancialStatements;
 	}());
