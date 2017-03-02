@@ -139,6 +139,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.period = period;
 	        this.description = description;
 	        this.amount = amount;
+	        this.debit = debit;
+	        this.credit = credit;
 	        debit.debit(this);
 	        credit.credit(this);
 	        period.logJournalEntry(this);
@@ -240,6 +242,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                throw new Error("Unknown account type: " + cl.name);
 	            }
 	        }
+	        this.netIncome = this.incomeTotal - this.expensesTotal;
 	    }
 	    return IncomeStatement;
 	}());

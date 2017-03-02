@@ -25,6 +25,7 @@ export default class IncomeStatement {
 				throw new Error(`Unknown account type: ${cl.name}`)
 			}
 		}	
+		this.netIncome = this.incomeTotal - this.expensesTotal
 	}
 
 }

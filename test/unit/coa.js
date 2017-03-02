@@ -2,12 +2,12 @@ const Path = require('path')
 import { test, BookKeeper } from './fixtures'
 
 test(`Generate Financial Statements (${Path.basename(__filename)})`, (t) => {
-	const wages = new BookKeeper.DebitAccount('Wages')
+	const wages = new BookKeeper.CreditAccount('Wages')
 	const checking = new BookKeeper.DebitAccount('Checking')
 	const earnings = new BookKeeper.CreditAccount('Retained Earnings')
 	const coa = new BookKeeper.ChartOfAccounts() // eslint-disable-line no-unused-vars
 	const p = new BookKeeper.Period(2016, coa, function() {
-		coa.journalEntry(p, 'Close Wages', wages.balance, earnings, wages)
+		coa.journalEntry(p, 'Close Wages', wages.balance, wages, earnings)
 	})
 	coa.incomeStatementAccount(wages)
 	coa.balanceSheetAccount(checking)
@@ -41,6 +41,7 @@ test(`Generate Financial Statements (${Path.basename(__filename)})`, (t) => {
 	let roo = income - expenses
 	t.equal(incomeStatement.incomeTotal, income, 'Income total is sum of income')
 	t.equal(incomeStatement.expensesTotal, expenses, 'Expenses total is sum of expenses')
+	console.log({income: income, expenses: expenses, roo: roo, bs: balanceSheet, is: incomeStatement})
 	t.equal(incomeStatement.netIncome, roo, 'Net Income is income - expenses')
 
 	t.end()

@@ -90,6 +90,8 @@ declare module 'BookKeeper/JournalEntry' {
         readonly period: Period;
         readonly description: string;
         readonly amount: number;
+        readonly debit: Account;
+        readonly credit: Account;
         constructor(coa: ChartOfAccounts, period: Period, description: string, amount: number, debit: Account, credit: Account);
     }
 }
