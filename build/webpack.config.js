@@ -2,8 +2,12 @@ const webpack = require( 'webpack' )
 const path = require('path')
 const projectRoot = path.resolve(__dirname+"/../")
 
+// This is horribly broken
+//const DtsBundlerPlugin = require('dtsbundler-webpack-plugin')
+
 module.exports = {
-  entry: projectRoot+'/src/BookKeeper.js',
+  entry: projectRoot+'/src/BookKeeper.ts',
+	devtool: 'source-map',
   output: {
     path: projectRoot,
     filename: 'BookKeeper.js',
@@ -12,10 +16,16 @@ module.exports = {
     umdNamedDefine: true
   },
   resolve: {
-    extensions: [ '', '.js']
+    extensions: [ '', '.js', '.ts','.tsx']
   },
   module: {
 		preLoaders: [
+			{
+				test: /.tsx?$/,
+				loader: 'tslint',
+				include: projectRoot,
+				exclude: /node_modules/
+			},
 			{
 				test: /.js$/,
 				loader: 'eslint',
@@ -24,6 +34,12 @@ module.exports = {
 			}
 		],
 		loaders: [
+			{
+				test: /\.tsx?$/, 
+				loader: 'ts-loader',
+				include: projectRoot,
+				exclude: /node_modules/
+			},
 			{
 				test: /.js$/,
 				loader: 'babel-loader',
@@ -36,9 +52,16 @@ module.exports = {
 			}
 		]
   },
-/*
+	tslint: {
+		emitErrors: true,
+		failOnHint: true,
+	},
 	plugins: [
-		new BabiliPlugin(, overrides)
-	]
+/*
+		new DtsBundlerPlugin({
+			out:'./BookKeeper.d.ts',
+		})
 */
+		//new BabiliPlugin(, overrides)
+	]
 }

@@ -1,5 +1,5 @@
 import test from 'tape'
-import BookKeeper from '../../src/BookKeeper'
+import BookKeeper from '../../BookKeeper'
 
 const setup = () => {
 	return {}

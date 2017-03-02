@@ -1,32 +1,30 @@
 import JournalEntry from './JournalEntry'
-import CreditAccount from './CreditAccount'
+import Account from './Account'
+import Period from './Period'
 export default class ChartOfAccounts {
-	constructor() {
-		this.bsaccts = []
-		this.isaccts = []
-		this.eqaccts = []
-		this.journal = []
-		this.total = 0
-	}
+
+	bsaccts: Account[] = []
+	isaccts: Account[] = []
+	eqaccts: Account[] = []
+	journal: JournalEntry[] = []
+	total:number = 0
+
 	get incomeStatementAccounts() { return this.isaccts }
 	get balanceSheetAccounts() { return this.bsaccts }
 	get equityAccounts() { return this.eqaccts }
 	get accounts() {
 		return this.bsaccts.concat(this.isaccts,this.eqaccts)
 	}
-	incomeStatementAccount(acct) {
+	incomeStatementAccount(acct: Account) {
 		this.isaccts.push(acct)
 	}
-	balanceSheetAccount(acct) {
+	balanceSheetAccount(acct: Account) {
 		this.bsaccts.push(acct)
 	}
-	equityAccount(acct) {
-		if (!(acct instanceof CreditAccount)) {
-			throw new Error(`Equity accounts must be Credit Accounts`)
-		}
+	equityAccount(acct: Account) {
 		this.eqaccts.push(acct)
 	}
-	journalEntry(period, descr, amount, debit, credit) {
+	journalEntry(period: Period, descr: string, amount: number, debit: Account, credit: Account) {
 		return new JournalEntry(
 			this,
 			period,
@@ -36,7 +34,7 @@ export default class ChartOfAccounts {
 			credit,
 		)
 	}
-	logJournalEntry(je) {
+	logJournalEntry(je: JournalEntry) {
 		this.journal.push(je)
 		this.total += je.amount
 	}
