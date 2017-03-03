@@ -8,5 +8,5 @@ const setup = () => {
 export {
 	setup,
 	test,
-	BookKeeper
+	BookKeeper,
 }

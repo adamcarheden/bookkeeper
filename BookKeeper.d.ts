@@ -4,57 +4,45 @@ declare module 'BookKeeper' {
     import ChartOfAccounts from 'BookKeeper/ChartOfAccounts';
     import Period from 'BookKeeper/Period';
     import BankruptError from 'BookKeeper/BankruptError';
-    import DebitAccount from 'BookKeeper/DebitAccount';
-    import CreditAccount from 'BookKeeper/CreditAccount';
+    import ACCOUNT_TYPE from 'BookKeeper/ACCOUNT_TYPE';
     var _default: {
         ChartOfAccounts: typeof ChartOfAccounts;
-        DebitAccount: typeof DebitAccount;
-        CreditAccount: typeof CreditAccount;
         Period: typeof Period;
         BankruptError: typeof BankruptError;
+        ACCOUNT_TYPE: typeof ACCOUNT_TYPE;
     };
     export default _default;
 }
 
 declare module 'BookKeeper/ChartOfAccounts' {
-    import JournalEntry from 'BookKeeper/JournalEntry';
     import Account from 'BookKeeper/Account';
-    import Period from 'BookKeeper/Period';
     export default class ChartOfAccounts {
-        bsaccts: Account[];
-        isaccts: Account[];
-        eqaccts: Account[];
-        journal: JournalEntry[];
-        total: number;
-        readonly incomeStatementAccounts: Account[];
-        readonly balanceSheetAccounts: Account[];
-        readonly equityAccounts: Account[];
-        readonly accounts: Account[];
-        incomeStatementAccount(acct: Account): void;
-        balanceSheetAccount(acct: Account): void;
-        equityAccount(acct: Account): void;
-        journalEntry(period: Period, descr: string, amount: number, debit: Account, credit: Account): JournalEntry;
-        logJournalEntry(je: JournalEntry): void;
+        readonly assets: Account;
+        readonly liabilities: Account;
+        readonly income: Account;
+        readonly expenses: Account;
+        readonly equity: Account;
     }
 }
 
 declare module 'BookKeeper/Period' {
     import ChartOfAccounts from 'BookKeeper/ChartOfAccounts';
+    import Account from 'BookKeeper/Account';
     import JournalEntry from 'BookKeeper/JournalEntry';
     import IncomeStatement from 'BookKeeper/IncomeStatement';
     import BalanceSheet from 'BookKeeper/BalanceSheet';
     import FinancialStatements from 'BookKeeper/FinancialStatements';
+    export type closeFunction = () => void;
     export default class Period {
-        period: any;
-        coa: ChartOfAccounts;
+        readonly period: any;
+        readonly coa: ChartOfAccounts;
         journal: JournalEntry[];
-        total: number;
-        autoClose: () => never;
+        autoClose: closeFunction;
         closed: boolean;
         financialStatements: FinancialStatements;
-        constructor(period: any, coa: ChartOfAccounts, autoClose: boolean);
-        logJournalEntry(je: JournalEntry): void;
-        close(closer: () => never): void;
+        constructor(period: any, coa: ChartOfAccounts, autoClose?: closeFunction);
+        close(closer: closeFunction): void;
+        journalEntry(description: string, amount: number, debit: Account, credit: Account): void;
         readonly balanceSheet: BalanceSheet;
         readonly incomeStatement: IncomeStatement;
     }
@@ -68,73 +56,63 @@ declare module 'BookKeeper/BankruptError' {
     }
 }
 
-declare module 'BookKeeper/DebitAccount' {
-    import Account from 'BookKeeper/Account';
-    export default class DebitAccount extends Account {
-        readonly balance: number;
+declare module 'BookKeeper/ACCOUNT_TYPE' {
+    enum ACCOUNT_TYPE {
+        DEBIT_NORMAL = 0,
+        CREDIT_NORMAL = 1,
     }
-}
-
-declare module 'BookKeeper/CreditAccount' {
-    import Account from 'BookKeeper/Account';
-    export default class CreditAccount extends Account {
-        readonly balance: number;
-    }
-}
-
-declare module 'BookKeeper/JournalEntry' {
-    import ChartOfAccounts from 'BookKeeper/ChartOfAccounts';
-    import Period from 'BookKeeper/Period';
-    import Account from 'BookKeeper/Account';
-    export default class JournalEntry {
-        readonly period: Period;
-        readonly description: string;
-        readonly amount: number;
-        readonly debit: Account;
-        readonly credit: Account;
-        constructor(coa: ChartOfAccounts, period: Period, description: string, amount: number, debit: Account, credit: Account);
-    }
+    export default ACCOUNT_TYPE;
 }
 
 declare module 'BookKeeper/Account' {
     import JournalEntry from 'BookKeeper/JournalEntry';
-    abstract class Account {
-        name: string;
-        debits: JournalEntry[];
-        debit_total: number;
-        credits: JournalEntry[];
-        credit_total: number;
-        constructor(name: string);
+    import ACCOUNT_TYPE from 'BookKeeper/ACCOUNT_TYPE';
+    export default class Account {
+        readonly name: string;
+        readonly accountType: ACCOUNT_TYPE;
+        readonly subAccounts: Account[];
+        constructor(name: string, accountType: ACCOUNT_TYPE);
         debit(je: JournalEntry): void;
+        readonly debit_total: number;
+        readonly debits: JournalEntry[];
         credit(je: JournalEntry): void;
-        readonly abstract balance: number;
+        readonly credits: JournalEntry[];
+        readonly credit_total: number;
+        subAccount(name: string, acctType: ACCOUNT_TYPE): Account;
+        _balance(): number;
+        readonly balance: number;
+        readonly statement: any;
     }
-    export default Account;
+}
+
+declare module 'BookKeeper/JournalEntry' {
+    import Account from 'BookKeeper/Account';
+    export default class JournalEntry {
+        readonly description: string;
+        readonly amount: number;
+        readonly debit: Account;
+        readonly credit: Account;
+        constructor(description: string, amount: number, debit: Account, credit: Account);
+    }
 }
 
 declare module 'BookKeeper/IncomeStatement' {
-    import Account from 'BookKeeper/Account';
+    import ChartOfAccounts from 'BookKeeper/ChartOfAccounts';
     export default class IncomeStatement {
-        income: any;
-        incomeTotal: number;
-        expenses: any;
-        expensesTotal: number;
-        netIncome: number;
-        constructor(isaccts: Account[]);
+        readonly subAccounts: any;
+        constructor(coa: ChartOfAccounts);
+        readonly netIncome: number;
+        readonly balance: number;
     }
 }
 
 declare module 'BookKeeper/BalanceSheet' {
-    import Account from 'BookKeeper/Account';
+    import ChartOfAccounts from 'BookKeeper/ChartOfAccounts';
     export default class BalanceSheet {
-        assets: any;
-        assetsTotal: number;
-        liabilities: any;
-        liabilitiesTotal: number;
-        equity: any;
-        equityTotal: number;
-        netWorth: number;
-        constructor(bsaccts: Account[], eqaccts: Account[]);
+        readonly subAccounts: any;
+        constructor(coa: ChartOfAccounts);
+        readonly netWorth: number;
+        readonly balance: number;
     }
 }
 

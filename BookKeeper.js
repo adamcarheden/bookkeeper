@@ -57,16 +57,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var ChartOfAccounts_1 = __webpack_require__(1);
-	var Period_1 = __webpack_require__(3);
-	var BankruptError_1 = __webpack_require__(10);
-	var DebitAccount_1 = __webpack_require__(7);
-	var CreditAccount_1 = __webpack_require__(5);
+	var Period_1 = __webpack_require__(4);
+	var BankruptError_1 = __webpack_require__(9);
+	var ACCOUNT_TYPE_1 = __webpack_require__(3);
 	exports.default = {
 	    ChartOfAccounts: ChartOfAccounts_1.default,
-	    DebitAccount: DebitAccount_1.default,
-	    CreditAccount: CreditAccount_1.default,
 	    Period: Period_1.default,
-	    BankruptError: BankruptError_1.default
+	    BankruptError: BankruptError_1.default,
+	    ACCOUNT_TYPE: ACCOUNT_TYPE_1.default,
 	};
 
 
@@ -76,53 +74,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
-	var JournalEntry_1 = __webpack_require__(2);
+	var Account_1 = __webpack_require__(2);
+	var ACCOUNT_TYPE_1 = __webpack_require__(3);
 	var ChartOfAccounts = (function () {
 	    function ChartOfAccounts() {
-	        this.bsaccts = [];
-	        this.isaccts = [];
-	        this.eqaccts = [];
-	        this.journal = [];
-	        this.total = 0;
+	        this.assets = new Account_1.default('Assets', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
+	        this.liabilities = new Account_1.default('Liabilities', ACCOUNT_TYPE_1.default.CREDIT_NORMAL);
+	        this.income = new Account_1.default('Income', ACCOUNT_TYPE_1.default.CREDIT_NORMAL);
+	        this.expenses = new Account_1.default('Expenses', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
+	        this.equity = new Account_1.default('Equity', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
 	    }
-	    Object.defineProperty(ChartOfAccounts.prototype, "incomeStatementAccounts", {
-	        get: function () { return this.isaccts; },
-	        enumerable: true,
-	        configurable: true
-	    });
-	    Object.defineProperty(ChartOfAccounts.prototype, "balanceSheetAccounts", {
-	        get: function () { return this.bsaccts; },
-	        enumerable: true,
-	        configurable: true
-	    });
-	    Object.defineProperty(ChartOfAccounts.prototype, "equityAccounts", {
-	        get: function () { return this.eqaccts; },
-	        enumerable: true,
-	        configurable: true
-	    });
-	    Object.defineProperty(ChartOfAccounts.prototype, "accounts", {
-	        get: function () {
-	            return this.bsaccts.concat(this.isaccts, this.eqaccts);
-	        },
-	        enumerable: true,
-	        configurable: true
-	    });
-	    ChartOfAccounts.prototype.incomeStatementAccount = function (acct) {
-	        this.isaccts.push(acct);
-	    };
-	    ChartOfAccounts.prototype.balanceSheetAccount = function (acct) {
-	        this.bsaccts.push(acct);
-	    };
-	    ChartOfAccounts.prototype.equityAccount = function (acct) {
-	        this.eqaccts.push(acct);
-	    };
-	    ChartOfAccounts.prototype.journalEntry = function (period, descr, amount, debit, credit) {
-	        return new JournalEntry_1.default(this, period, descr, amount, debit, credit);
-	    };
-	    ChartOfAccounts.prototype.logJournalEntry = function (je) {
-	        this.journal.push(je);
-	        this.total += je.amount;
-	    };
 	    return ChartOfAccounts;
 	}());
 	exports.default = ChartOfAccounts;
@@ -130,62 +91,162 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
-/***/ function(module, exports) {
-
-	"use strict";
-	Object.defineProperty(exports, "__esModule", { value: true });
-	var JournalEntry = (function () {
-	    function JournalEntry(coa, period, description, amount, debit, credit) {
-	        this.period = period;
-	        this.description = description;
-	        this.amount = amount;
-	        this.debit = debit;
-	        this.credit = credit;
-	        debit.debit(this);
-	        credit.credit(this);
-	        period.logJournalEntry(this);
-	        coa.logJournalEntry(this);
-	    }
-	    return JournalEntry;
-	}());
-	exports.default = JournalEntry;
-
-
-/***/ },
-/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
-	var IncomeStatement_1 = __webpack_require__(4);
-	var BalanceSheet_1 = __webpack_require__(8);
-	var FinancialStatements_1 = __webpack_require__(9);
+	var ACCOUNT_TYPE_1 = __webpack_require__(3);
+	var Account = (function () {
+	    function Account(name, accountType) {
+	        this.name = name;
+	        this.accountType = accountType;
+	        this._debits = [];
+	        this._debit_total = 0;
+	        this._credits = [];
+	        this._credit_total = 0;
+	        this.subAccounts = [];
+	    }
+	    Account.prototype.debit = function (je) {
+	        this.debits.push(je);
+	        this._debit_total += je.amount;
+	    };
+	    Object.defineProperty(Account.prototype, "debit_total", {
+	        get: function () {
+	            return this.subAccounts.reduce(function (acc, subAcct, i) {
+	                return acc + subAcct._debit_total;
+	            }, this._debit_total);
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(Account.prototype, "debits", {
+	        get: function () {
+	            return this.subAccounts.reduce(function (acc, subAcct, i) {
+	                return acc.concat(subAcct.debits);
+	            }, []);
+	            //	}, this._debits)
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Account.prototype.credit = function (je) {
+	        this.credits.push(je);
+	        this._credit_total += je.amount;
+	    };
+	    Object.defineProperty(Account.prototype, "credits", {
+	        get: function () {
+	            return this.subAccounts.reduce(function (acc, subAcct, i) {
+	                return acc.concat(subAcct.credits);
+	            }, this._credits);
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(Account.prototype, "credit_total", {
+	        get: function () {
+	            return this.subAccounts.reduce(function (acc, subAcct, i) {
+	                return acc + subAcct._credit_total;
+	            }, this._credit_total);
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Account.prototype.subAccount = function (name, acctType) {
+	        var sub = new Account(name, acctType);
+	        this.subAccounts.push(sub);
+	        return sub;
+	    };
+	    Account.prototype._balance = function () {
+	        var bal;
+	        switch (this.accountType) {
+	            case ACCOUNT_TYPE_1.default.CREDIT_NORMAL:
+	                bal = this._credit_total - this._debit_total;
+	            case ACCOUNT_TYPE_1.default.DEBIT_NORMAL:
+	                bal = this._debit_total - this._credit_total;
+	                break;
+	            default:
+	                throw new Error("Unknown account type: " + this.accountType);
+	        }
+	        return bal;
+	    };
+	    Object.defineProperty(Account.prototype, "balance", {
+	        get: function () {
+	            return this.subAccounts.reduce(function (acc, subAcct, i) {
+	                return acc + subAcct.balance;
+	            }, this._balance());
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(Account.prototype, "statement", {
+	        get: function () {
+	            var stmt = {
+	                balance: this._balance(),
+	                subAccounts: {}
+	            };
+	            for (var i = 0; i < this.subAccounts.length; i++) {
+	                stmt.subAccounts[this.subAccounts[i].name] = this.subAccounts[i].statement;
+	                stmt.balance += stmt.subAccounts[this.subAccounts[i].name].balance;
+	            }
+	            return stmt;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    return Account;
+	}());
+	exports.default = Account;
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	"use strict";
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var ACCOUNT_TYPE;
+	(function (ACCOUNT_TYPE) {
+	    ACCOUNT_TYPE[ACCOUNT_TYPE["DEBIT_NORMAL"] = 0] = "DEBIT_NORMAL";
+	    ACCOUNT_TYPE[ACCOUNT_TYPE["CREDIT_NORMAL"] = 1] = "CREDIT_NORMAL";
+	})(ACCOUNT_TYPE || (ACCOUNT_TYPE = {}));
+	exports.default = ACCOUNT_TYPE;
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var JournalEntry_1 = __webpack_require__(5);
+	var IncomeStatement_1 = __webpack_require__(6);
+	var BalanceSheet_1 = __webpack_require__(7);
+	var FinancialStatements_1 = __webpack_require__(8);
 	var Period = (function () {
 	    function Period(period, coa, autoClose) {
-	        this.journal = [];
-	        this.total = 0;
 	        this.period = period;
 	        this.coa = coa;
+	        this.journal = [];
 	        this.autoClose = typeof autoClose === 'function'
 	            ? autoClose
 	            : function () { throw new Error('You called balanceSheet or incomeStatement prior to closing the period, but you did not provide an autoClose function at instantiation'); };
 	        this.closed = false;
 	    }
-	    Period.prototype.logJournalEntry = function (je) {
-	        this.journal.push(je);
-	        this.total += je.amount;
-	    };
 	    Period.prototype.close = function (closer) {
-	        var incomeStatement = new IncomeStatement_1.default(this.coa.incomeStatementAccounts);
+	        var incomeStatement = new IncomeStatement_1.default(this.coa);
 	        closer();
-	        for (var i in this.coa.incomeStatementAccounts) {
-	            var acct = this.coa.incomeStatementAccounts[i];
-	            if (acct.balance !== 0)
-	                throw new Error("Income Statement account " + acct.name + " has non-zero balance after close");
+	        var isaccts = [this.coa.income, this.coa.expenses];
+	        for (var i = 0; i < isaccts.length; i++) {
+	            if (isaccts[i].balance !== 0)
+	                throw new Error("Income Statement account '" + isaccts[i].name + "' has non-zero balance after close");
 	        }
-	        var balanceSheet = new BalanceSheet_1.default(this.coa.balanceSheetAccounts, this.coa.equityAccounts);
+	        var balanceSheet = new BalanceSheet_1.default(this.coa);
 	        this.closed = true;
 	        this.financialStatements = new FinancialStatements_1.default(incomeStatement, balanceSheet);
+	    };
+	    Period.prototype.journalEntry = function (description, amount, debit, credit) {
+	        var je = new JournalEntry_1.default(description, amount, debit, credit);
+	        this.journal.push(je);
 	    };
 	    Object.defineProperty(Period.prototype, "balanceSheet", {
 	        get: function () {
@@ -213,74 +274,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	Object.defineProperty(exports, "__esModule", { value: true });
-	var CreditAccount_1 = __webpack_require__(5);
-	var DebitAccount_1 = __webpack_require__(7);
-	var IncomeStatement = (function () {
-	    function IncomeStatement(isaccts) {
-	        this.income = {};
-	        this.incomeTotal = 0;
-	        this.expenses = {};
-	        this.expensesTotal = 0;
-	        this.netIncome = 0;
-	        for (var i in isaccts) {
-	            var acct = isaccts[i];
-	            if (acct instanceof CreditAccount_1.default) {
-	                this.income[acct.name] = acct.balance;
-	                this.incomeTotal += acct.balance;
-	            }
-	            else if (acct instanceof DebitAccount_1.default) {
-	                this.expenses[acct.name] = acct.balance;
-	                this.expensesTotal += acct.balance;
-	            }
-	            else {
-	                cl = acct.constructor;
-	                throw new Error("Unknown account type: " + cl.name);
-	            }
-	        }
-	        this.netIncome = this.incomeTotal - this.expensesTotal;
-	    }
-	    return IncomeStatement;
-	}());
-	exports.default = IncomeStatement;
-
-
-/***/ },
 /* 5 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	"use strict";
-	var __extends = (this && this.__extends) || (function () {
-	    var extendStatics = Object.setPrototypeOf ||
-	        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-	        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-	    return function (d, b) {
-	        extendStatics(d, b);
-	        function __() { this.constructor = d; }
-	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	    };
-	})();
 	Object.defineProperty(exports, "__esModule", { value: true });
-	var Account_1 = __webpack_require__(6);
-	var CreditAccount = (function (_super) {
-	    __extends(CreditAccount, _super);
-	    function CreditAccount() {
-	        return _super !== null && _super.apply(this, arguments) || this;
+	var JournalEntry = (function () {
+	    function JournalEntry(description, amount, debit, credit) {
+	        this.description = description;
+	        this.amount = amount;
+	        this.debit = debit;
+	        this.credit = credit;
+	        debit.debit(this);
+	        credit.credit(this);
 	    }
-	    Object.defineProperty(CreditAccount.prototype, "balance", {
-	        get: function () {
-	            return this.credit_total - this.debit_total;
-	        },
-	        enumerable: true,
-	        configurable: true
-	    });
-	    return CreditAccount;
-	}(Account_1.default));
-	exports.default = CreditAccount;
+	    return JournalEntry;
+	}());
+	exports.default = JournalEntry;
 
 
 /***/ },
@@ -289,118 +299,66 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
-	var Account = (function () {
-	    function Account(name) {
-	        this.debits = [];
-	        this.debit_total = 0;
-	        this.credits = [];
-	        this.credit_total = 0;
-	        this.name = name;
+	var IncomeStatement = (function () {
+	    function IncomeStatement(coa) {
+	        this.subAccounts = {};
+	        this._netIncome = 0;
+	        var isaccts = [coa.income, coa.expenses];
+	        for (var i in isaccts) {
+	            var acct = isaccts[i];
+	            this.subAccounts[isaccts[i].name] = isaccts[i].statement;
+	        }
+	        this._netIncome = this.subAccounts[coa.income.name].balance - this.subAccounts[coa.expenses.name].balance;
 	    }
-	    Account.prototype.debit = function (je) {
-	        this.debits.push(je);
-	        this.debit_total += je.amount;
-	    };
-	    Account.prototype.credit = function (je) {
-	        this.credits.push(je);
-	        this.credit_total += je.amount;
-	    };
-	    return Account;
+	    Object.defineProperty(IncomeStatement.prototype, "netIncome", {
+	        get: function () { return this._netIncome; },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(IncomeStatement.prototype, "balance", {
+	        get: function () { return this._netIncome; },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    return IncomeStatement;
 	}());
-	exports.default = Account;
+	exports.default = IncomeStatement;
 
 
 /***/ },
 /* 7 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	"use strict";
-	var __extends = (this && this.__extends) || (function () {
-	    var extendStatics = Object.setPrototypeOf ||
-	        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-	        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-	    return function (d, b) {
-	        extendStatics(d, b);
-	        function __() { this.constructor = d; }
-	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	    };
-	})();
 	Object.defineProperty(exports, "__esModule", { value: true });
-	var Account_1 = __webpack_require__(6);
-	var DebitAccount = (function (_super) {
-	    __extends(DebitAccount, _super);
-	    function DebitAccount() {
-	        return _super !== null && _super.apply(this, arguments) || this;
+	var BalanceSheet = (function () {
+	    function BalanceSheet(coa) {
+	        this.subAccounts = {};
+	        this._netWorth = 0;
+	        var bsaccts = [coa.assets, coa.liabilities, coa.equity];
+	        for (var i in bsaccts) {
+	            var acct = bsaccts[i];
+	            this.subAccounts[bsaccts[i].name] = bsaccts[i].statement;
+	        }
+	        this._netWorth = this.subAccounts[coa.assets.name].balance - this.subAccounts[coa.liabilities.name].balance;
 	    }
-	    Object.defineProperty(DebitAccount.prototype, "balance", {
-	        get: function () {
-	            return this.debit_total - this.credit_total;
-	        },
+	    Object.defineProperty(BalanceSheet.prototype, "netWorth", {
+	        get: function () { return this._netWorth; },
 	        enumerable: true,
 	        configurable: true
 	    });
-	    return DebitAccount;
-	}(Account_1.default));
-	exports.default = DebitAccount;
-
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	Object.defineProperty(exports, "__esModule", { value: true });
-	var CreditAccount_1 = __webpack_require__(5);
-	var DebitAccount_1 = __webpack_require__(7);
-	var BalanceSheet = (function () {
-	    function BalanceSheet(bsaccts, eqaccts) {
-	        this.assets = {};
-	        this.assetsTotal = 0;
-	        this.liabilities = {};
-	        this.liabilitiesTotal = 0;
-	        this.equity = {};
-	        this.equityTotal = 0;
-	        this.netWorth = 0;
-	        for (var i in bsaccts) {
-	            var acct = bsaccts[i];
-	            if (acct instanceof CreditAccount_1.default) {
-	                this.liabilities[acct.name] = acct.balance;
-	                this.liabilitiesTotal += acct.balance;
-	            }
-	            else if (acct instanceof DebitAccount_1.default) {
-	                this.assets[acct.name] = acct.balance;
-	                this.assetsTotal += acct.balance;
-	            }
-	            else {
-	                cl = acct.constructor;
-	                throw new Error("Unknown account type: " + cl.name);
-	            }
-	        }
-	        this.netWorth = this.assetsTotal - this.liabilitiesTotal;
-	        for (var i in eqaccts) {
-	            var acct = eqaccts[i];
-	            console.log({ i: i, acct: acct });
-	            if (acct instanceof CreditAccount_1.default) {
-	                this.equity[acct.name] = acct.balance;
-	                this.equityTotal += acct.balance;
-	            }
-	            else if (acct instanceof DebitAccount_1.default) {
-	                cl = acct.constructor;
-	                throw new Error("Equity account " + acct.name + " is a " + cl.name + ". It should be a credit.");
-	            }
-	            else {
-	                cl = acct.constructor;
-	                throw new Error("Unknown account type: " + cl.name);
-	            }
-	        }
-	    }
+	    Object.defineProperty(BalanceSheet.prototype, "balance", {
+	        get: function () { return this._netWorth; },
+	        enumerable: true,
+	        configurable: true
+	    });
 	    return BalanceSheet;
 	}());
 	exports.default = BalanceSheet;
 
 
 /***/ },
-/* 9 */
+/* 8 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -416,7 +374,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 10 */
+/* 9 */
 /***/ function(module, exports) {
 
 	"use strict";

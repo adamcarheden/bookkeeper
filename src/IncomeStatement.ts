@@ -1,31 +1,20 @@
 import Account from './Account'
-import CreditAccount from './CreditAccount'
-import DebitAccount from './DebitAccount'
+import ChartOfAccounts from './ChartOfAccounts'
 
-declare var cl: any
 export default class IncomeStatement {
 
-	income: any = {}
-	incomeTotal: number = 0
-	expenses: any = {}
-	expensesTotal:number = 0
-	netIncome: number = 0
+	readonly subAccounts: any = {}
+	private _netIncome: number = 0
 
-	constructor(isaccts: Account[]) {
+	constructor(coa: ChartOfAccounts) {
+		let isaccts = [coa.income, coa.expenses]
 		for (let i in isaccts) {
 			let acct = isaccts[i]
-			if (acct instanceof CreditAccount) {
-				this.income[acct.name] = acct.balance
-				this.incomeTotal += acct.balance
-			} else if (acct instanceof DebitAccount) {
-				this.expenses[acct.name] = acct.balance
-				this.expensesTotal += acct.balance
-			} else {
-				cl = acct.constructor
-				throw new Error(`Unknown account type: ${cl.name}`)
-			}
+			this.subAccounts[isaccts[i].name] = isaccts[i].statement
 		}	
-		this.netIncome = this.incomeTotal - this.expensesTotal
+		this._netIncome = this.subAccounts[coa.income.name].balance - this.subAccounts[coa.expenses.name].balance
 	}
+	get netIncome() { return this._netIncome }
+	get balance() { return this._netIncome }
 
 }

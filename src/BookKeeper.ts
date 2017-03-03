@@ -1,12 +1,11 @@
 import ChartOfAccounts from './ChartOfAccounts'
 import Period from './Period'
 import BankruptError from './BankruptError'
-import DebitAccount from './DebitAccount'
-import CreditAccount from './CreditAccount'
+import ACCOUNT_TYPE from './ACCOUNT_TYPE'
+
 export default {
 	ChartOfAccounts: ChartOfAccounts,
-	DebitAccount: DebitAccount,
-	CreditAccount: CreditAccount,
 	Period: Period,
-	BankruptError: BankruptError
+	BankruptError: BankruptError,
+	ACCOUNT_TYPE: ACCOUNT_TYPE,
 }

@@ -2,18 +2,14 @@ const Path = require('path')
 import { test, BookKeeper } from './fixtures'
 
 test(`Generate Financial Statements (${Path.basename(__filename)})`, (t) => {
-	const wages = new BookKeeper.CreditAccount('Wages')
-	const checking = new BookKeeper.DebitAccount('Checking')
-	const earnings = new BookKeeper.CreditAccount('Retained Earnings')
-	const coa = new BookKeeper.ChartOfAccounts() // eslint-disable-line no-unused-vars
-	const p = new BookKeeper.Period(2016, coa, function() {
-		coa.journalEntry(p, 'Close Wages', wages.balance, wages, earnings)
+	const coa = new BookKeeper.ChartOfAccounts()
+	const wages = coa.income.subAccount('Wages', BookKeeper.ACCOUNT_TYPE.CREDIT_NORMAL)
+	const checking = coa.assets.subAccount('Checking', BookKeeper.ACCOUNT_TYPE.DEBIT_NORMAL)
+	const earnings = coa.equity.subAccount('Retained Earnings', BookKeeper.ACCOUNT_TYPE.CREDIT_NORMAL)
+	const p = new BookKeeper.Period(2016, coa, function(period) {
+		p.journalEntry('Close Wages', wages.balance, wages, earnings)
 	})
-	coa.incomeStatementAccount(wages)
-	coa.balanceSheetAccount(checking)
-	coa.equityAccount(earnings)
-
-	coa.journalEntry(p, 'Payday', 1099.99, checking, wages)
+	p.journalEntry('Payday', 1099.99, checking, wages)
 
 	const balanceSheet = p.balanceSheet
 	let assets = 0

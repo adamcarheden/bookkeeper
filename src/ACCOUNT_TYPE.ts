@@ -1,0 +1,5 @@
+enum ACCOUNT_TYPE {
+	DEBIT_NORMAL = 0,
+	CREDIT_NORMAL = 1,
+}
+export default ACCOUNT_TYPE

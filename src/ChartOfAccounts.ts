@@ -1,41 +1,13 @@
 import JournalEntry from './JournalEntry'
 import Account from './Account'
+import ACCOUNT_TYPE from './ACCOUNT_TYPE'
 import Period from './Period'
 export default class ChartOfAccounts {
 
-	bsaccts: Account[] = []
-	isaccts: Account[] = []
-	eqaccts: Account[] = []
-	journal: JournalEntry[] = []
-	total:number = 0
+	readonly assets:      Account = new Account('Assets',      ACCOUNT_TYPE.DEBIT_NORMAL)
+	readonly liabilities: Account = new Account('Liabilities', ACCOUNT_TYPE.CREDIT_NORMAL)
+	readonly income:      Account = new Account('Income',      ACCOUNT_TYPE.CREDIT_NORMAL)
+	readonly expenses:    Account = new Account('Expenses',    ACCOUNT_TYPE.DEBIT_NORMAL)
+	readonly equity:      Account = new Account('Equity',      ACCOUNT_TYPE.DEBIT_NORMAL)
 
-	get incomeStatementAccounts() { return this.isaccts }
-	get balanceSheetAccounts() { return this.bsaccts }
-	get equityAccounts() { return this.eqaccts }
-	get accounts() {
-		return this.bsaccts.concat(this.isaccts,this.eqaccts)
-	}
-	incomeStatementAccount(acct: Account) {
-		this.isaccts.push(acct)
-	}
-	balanceSheetAccount(acct: Account) {
-		this.bsaccts.push(acct)
-	}
-	equityAccount(acct: Account) {
-		this.eqaccts.push(acct)
-	}
-	journalEntry(period: Period, descr: string, amount: number, debit: Account, credit: Account) {
-		return new JournalEntry(
-			this,
-			period,
-			descr,
-			amount,
-			debit,
-			credit,
-		)
-	}
-	logJournalEntry(je: JournalEntry) {
-		this.journal.push(je)
-		this.total += je.amount
-	}
 }
