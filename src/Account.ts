@@ -1,37 +1,36 @@
 import ChartOfAccounts from './ChartOfAccounts'
-import JournalEntry from './JournalEntry'
 import ACCOUNT_TYPE from './ACCOUNT_TYPE'
 
 export default class Account {
 
-	private _debits: JournalEntry[] = []
+	private _debits: number[] = []
 	private _debit_total: number = 0
-	private _credits: JournalEntry[] = []
+	private _credits: number[] = []
 	private _credit_total: number = 0
 	readonly subAccounts: Account[] = []
 
 	constructor(readonly name: string, readonly accountType : ACCOUNT_TYPE) {}
 
-	debit(je: JournalEntry) {
-		this.debits.push(je)
-		this._debit_total += je.amount
+	debit(amount: number) {
+		this.debits.push(amount)
+		this._debit_total += amount
+	}
+	get debits() : number[] {
+		return this.subAccounts.reduce((acc, subAcct, i) => {
+			return acc.concat(subAcct.debits)
+		}, this._debits)
 	}
 	get debit_total() {
 		return this.subAccounts.reduce((acc, subAcct, i) => {
 			return acc + subAcct._debit_total
 		}, this._debit_total)
 	}
-	get debits() : JournalEntry[] {
-		return this.subAccounts.reduce((acc, subAcct, i) => {
-			return acc.concat(subAcct.debits)
-		}, [])
-	//	}, this._debits)
+
+	credit(amount: number) {
+		this.credits.push(amount)
+		this._credit_total += amount
 	}
-	credit(je: JournalEntry) {
-		this.credits.push(je)
-		this._credit_total += je.amount
-	}
-	get credits() : JournalEntry[] {
+	get credits() : number[] {
 		return this.subAccounts.reduce((acc, subAcct, i) => {
 			return acc.concat(subAcct.credits)
 		}, this._credits)
@@ -41,6 +40,7 @@ export default class Account {
 			return acc + subAcct._credit_total
 		}, this._credit_total)
 	}
+
 	subAccount(name: string, acctType: ACCOUNT_TYPE) {
 		let sub = new Account(name, acctType)
 		this.subAccounts.push(sub)

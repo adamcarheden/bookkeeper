@@ -106,10 +106,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._credit_total = 0;
 	        this.subAccounts = [];
 	    }
-	    Account.prototype.debit = function (je) {
-	        this.debits.push(je);
-	        this._debit_total += je.amount;
+	    Account.prototype.debit = function (amount) {
+	        this.debits.push(amount);
+	        this._debit_total += amount;
 	    };
+	    Object.defineProperty(Account.prototype, "debits", {
+	        get: function () {
+	            return this.subAccounts.reduce(function (acc, subAcct, i) {
+	                return acc.concat(subAcct.debits);
+	            }, this._debits);
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
 	    Object.defineProperty(Account.prototype, "debit_total", {
 	        get: function () {
 	            return this.subAccounts.reduce(function (acc, subAcct, i) {
@@ -119,19 +128,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        enumerable: true,
 	        configurable: true
 	    });
-	    Object.defineProperty(Account.prototype, "debits", {
-	        get: function () {
-	            return this.subAccounts.reduce(function (acc, subAcct, i) {
-	                return acc.concat(subAcct.debits);
-	            }, []);
-	            //	}, this._debits)
-	        },
-	        enumerable: true,
-	        configurable: true
-	    });
-	    Account.prototype.credit = function (je) {
-	        this.credits.push(je);
-	        this._credit_total += je.amount;
+	    Account.prototype.credit = function (amount) {
+	        this.credits.push(amount);
+	        this._credit_total += amount;
 	    };
 	    Object.defineProperty(Account.prototype, "credits", {
 	        get: function () {
@@ -246,8 +245,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.financialStatements = new FinancialStatements_1.default(incomeStatement, balanceSheet);
 	    };
 	    Period.prototype.journalEntry = function (description, amount, debit, credit) {
-	        var je = new JournalEntry_1.default(description, amount, debit, credit);
-	        this.journal.push(je);
+	        this.journalEntryComplex(description, [{ amount: amount, account: debit }], [{ amount: amount, account: credit }]);
+	    };
+	    Period.prototype.journalEntryComplex = function (description, debits, credits) {
+	        this.journal.push(new JournalEntry_1.default(description, debits, credits));
 	    };
 	    Object.defineProperty(Period.prototype, "balanceSheet", {
 	        get: function () {
@@ -281,13 +282,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var JournalEntry = (function () {
-	    function JournalEntry(description, amount, debit, credit) {
+	    function JournalEntry(description, debits, credits) {
 	        this.description = description;
-	        this.amount = amount;
-	        this.debit = debit;
-	        this.credit = credit;
-	        debit.debit(this);
-	        credit.credit(this);
+	        this.debits = debits;
+	        this.credits = credits;
+	        var debit_total = 0;
+	        for (var i = 0; i < debits.length; i++) {
+	            debit_total += debits[i].amount;
+	            debits[i].account.debit(debits[i].amount);
+	        }
+	        var credit_total = 0;
+	        for (var i = 0; i < credits.length; i++) {
+	            credit_total += credits[i].amount;
+	            credits[i].account.credit(credits[i].amount);
+	        }
+	        if (debit_total != credit_total)
+	            throw new Error("Debits (" + debit_total + ") != Credits (" + credit_total + ")");
 	    }
 	    return JournalEntry;
 	}());

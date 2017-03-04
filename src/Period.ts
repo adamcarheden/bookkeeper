@@ -1,6 +1,6 @@
 import ChartOfAccounts from './ChartOfAccounts'
 import Account from './Account'
-import JournalEntry from './JournalEntry'
+import {default as JournalEntry, JournalEntryItem } from './JournalEntry'
 import IncomeStatement from './IncomeStatement'
 import BalanceSheet from './BalanceSheet'
 import FinancialStatements from './FinancialStatements'
@@ -38,8 +38,18 @@ export default class Period {
 		debit: Account,
 		credit: Account
 	) {
-		let je = new JournalEntry(description, amount, debit, credit)
-		this.journal.push(je)
+		this.journalEntryComplex(
+			description,
+			[{ amount: amount, account: debit }],
+			[{ amount: amount, account: credit }],
+		)
+	}
+	journalEntryComplex(
+		description: string,
+		debits: JournalEntryItem[],
+		credits: JournalEntryItem[]
+	) {
+		this.journal.push(new JournalEntry(description, debits, credits))
 	}
 
 	get balanceSheet() {
