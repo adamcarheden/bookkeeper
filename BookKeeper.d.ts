@@ -79,7 +79,6 @@ declare module 'BookKeeper/Account' {
         readonly credits: JournalEntry[];
         readonly credit_total: number;
         subAccount(name: string, acctType: ACCOUNT_TYPE): Account;
-        _balance(): number;
         readonly balance: number;
         readonly statement: any;
     }

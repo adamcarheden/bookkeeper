@@ -161,6 +161,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        switch (this.accountType) {
 	            case ACCOUNT_TYPE_1.default.CREDIT_NORMAL:
 	                bal = this._credit_total - this._debit_total;
+	                break;
 	            case ACCOUNT_TYPE_1.default.DEBIT_NORMAL:
 	                bal = this._debit_total - this._credit_total;
 	                break;

@@ -2,6 +2,9 @@ const Path = require('path')
 import { test, BookKeeper } from './fixtures'
 
 test(`Generate Financial Statements (${Path.basename(__filename)})`, (t) => {
+
+	const PAYCHECK = 1099.99
+
 	const coa = new BookKeeper.ChartOfAccounts()
 	const wages = coa.income.subAccount('Wages', BookKeeper.ACCOUNT_TYPE.CREDIT_NORMAL)
 	const checking = coa.assets.subAccount('Checking', BookKeeper.ACCOUNT_TYPE.DEBIT_NORMAL)
@@ -9,7 +12,9 @@ test(`Generate Financial Statements (${Path.basename(__filename)})`, (t) => {
 	const p = new BookKeeper.Period(2016, coa, function(period) {
 		p.journalEntry('Close Wages', wages.balance, wages, earnings)
 	})
-	p.journalEntry('Payday', 1099.99, checking, wages)
+	p.journalEntry('Payday', PAYCHECK, checking, wages)
+
+	let roo = coa.income.balance - coa.expenses.balance
 
 	const balanceSheet = p.balanceSheet
 	let assets = 0
@@ -21,23 +26,10 @@ test(`Generate Financial Statements (${Path.basename(__filename)})`, (t) => {
 		liabilities += balanceSheet.liabilities[key]
 	}
 	let nw = assets - liabilities
-	t.equal(balanceSheet.assetsTotal, assets, 'Assets total is sum of assets')
-	t.equal(balanceSheet.liabilitiesTotal, liabilities, 'Liabilities total is sum of liabilities')
-	t.equal(balanceSheet.netWorth, nw, 'Net Worth is assets - liabilities')
+	t.equal(balanceSheet.balance, PAYCHECK, 'Balance sheet contains assets earned')
+	t.equal(balanceSheet.netWorth, coa.assets.balance - coa.liabilities.balance, 'Net Worth is assets - liabilities')
 
 	const incomeStatement = p.incomeStatement
-	let income = 0
-	for (let key in incomeStatement.income) {
-		income += incomeStatement.income[key]
-	}
-	let expenses = 0
-	for (let key in incomeStatement.expenses) {
-		expenses += incomeStatement.expenses[key]
-	}
-	let roo = income - expenses
-	t.equal(incomeStatement.incomeTotal, income, 'Income total is sum of income')
-	t.equal(incomeStatement.expensesTotal, expenses, 'Expenses total is sum of expenses')
-	console.log({income: income, expenses: expenses, roo: roo, bs: balanceSheet, is: incomeStatement})
 	t.equal(incomeStatement.netIncome, roo, 'Net Income is income - expenses')
 
 	t.end()

@@ -46,11 +46,12 @@ export default class Account {
 		this.subAccounts.push(sub)
 		return sub
 	}
-	_balance() {
+	private _balance() {
 		let bal
 		switch (this.accountType) {
 			case ACCOUNT_TYPE.CREDIT_NORMAL:
 				bal = this._credit_total - this._debit_total
+				break;
 			case ACCOUNT_TYPE.DEBIT_NORMAL:
 				bal = this._debit_total - this._credit_total
 				break;
