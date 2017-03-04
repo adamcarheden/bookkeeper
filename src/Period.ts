@@ -25,7 +25,7 @@ export default class Period {
 		closer()
 		let isaccts = [this.coa.income, this.coa.expenses]
 		for (let i = 0; i<isaccts.length; i++) {
-			if (isaccts[i].balance !== 0) throw new Error(`Income Statement account '${isaccts[i].name}' has non-zero balance after close`)
+			if (isaccts[i].balance !== 0) throw new Error(`Income Statement account '${isaccts[i].name}' has non-zero balance $${isaccts[i].balance} after close`)
 		}
 		const balanceSheet = new BalanceSheet(this.coa)
 		this.closed = true

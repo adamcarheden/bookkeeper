@@ -17,15 +17,6 @@ test(`Generate Financial Statements (${Path.basename(__filename)})`, (t) => {
 	let roo = coa.income.balance - coa.expenses.balance
 
 	const balanceSheet = p.balanceSheet
-	let assets = 0
-	for (let key in balanceSheet.assets) {
-		assets += balanceSheet.assets[key]
-	}
-	let liabilities = 0
-	for (let key in balanceSheet.liabilities) {
-		liabilities += balanceSheet.liabilities[key]
-	}
-	let nw = assets - liabilities
 	t.equal(balanceSheet.balance, PAYCHECK, 'Balance sheet contains assets earned')
 	t.equal(balanceSheet.netWorth, coa.assets.balance - coa.liabilities.balance, 'Net Worth is assets - liabilities')
 

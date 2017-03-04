@@ -239,7 +239,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var isaccts = [this.coa.income, this.coa.expenses];
 	        for (var i = 0; i < isaccts.length; i++) {
 	            if (isaccts[i].balance !== 0)
-	                throw new Error("Income Statement account '" + isaccts[i].name + "' has non-zero balance after close");
+	                throw new Error("Income Statement account '" + isaccts[i].name + "' has non-zero balance $" + isaccts[i].balance + " after close");
 	        }
 	        var balanceSheet = new BalanceSheet_1.default(this.coa);
 	        this.closed = true;
