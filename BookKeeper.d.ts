@@ -17,11 +17,14 @@ declare module 'BookKeeper' {
 declare module 'BookKeeper/ChartOfAccounts' {
     import Account from 'BookKeeper/Account';
     export default class ChartOfAccounts {
+        readonly generalLedger: Account;
         readonly assets: Account;
         readonly liabilities: Account;
         readonly income: Account;
         readonly expenses: Account;
         readonly equity: Account;
+        constructor();
+        toString(): string;
     }
 }
 
@@ -46,6 +49,8 @@ declare module 'BookKeeper/Period' {
         journalEntryComplex(description: string, debits: JournalEntryItem[], credits: JournalEntryItem[]): void;
         readonly balanceSheet: BalanceSheet;
         readonly incomeStatement: IncomeStatement;
+        printJournal(): string;
+        toString(): string;
     }
 }
 
@@ -78,9 +83,11 @@ declare module 'BookKeeper/Account' {
         credit(amount: number): void;
         readonly credits: number[];
         readonly credit_total: number;
-        subAccount(name: string, acctType: ACCOUNT_TYPE): Account;
+        subAccount(name: string, accountType?: ACCOUNT_TYPE): Account;
         readonly balance: number;
         readonly statement: any;
+        print(prefix?: string, indent?: string): string;
+        toString(): string;
     }
 }
 
@@ -95,6 +102,8 @@ declare module 'BookKeeper/JournalEntry' {
         readonly debits: JournalEntryItem[];
         readonly credits: JournalEntryItem[];
         constructor(description: string, debits: JournalEntryItem[], credits: JournalEntryItem[]);
+        print(maxLen?: number, decimals?: number, indent?: string): string;
+        toString(): string;
     }
 }
 

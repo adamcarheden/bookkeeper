@@ -1,13 +1,26 @@
-import JournalEntry from './JournalEntry'
 import Account from './Account'
 import ACCOUNT_TYPE from './ACCOUNT_TYPE'
 import Period from './Period'
 export default class ChartOfAccounts {
 
-	readonly assets:      Account = new Account('Assets',      ACCOUNT_TYPE.DEBIT_NORMAL)
-	readonly liabilities: Account = new Account('Liabilities', ACCOUNT_TYPE.CREDIT_NORMAL)
-	readonly income:      Account = new Account('Income',      ACCOUNT_TYPE.CREDIT_NORMAL)
-	readonly expenses:    Account = new Account('Expenses',    ACCOUNT_TYPE.DEBIT_NORMAL)
-	readonly equity:      Account = new Account('Equity',      ACCOUNT_TYPE.DEBIT_NORMAL)
+	readonly generalLedger: Account
+	readonly assets:        Account
+	readonly liabilities:   Account
+	readonly income:        Account
+	readonly expenses:      Account
+	readonly equity:        Account
+
+	constructor() { 
+		this.generalLedger = new Account('GeneralLedger', ACCOUNT_TYPE.DEBIT_NORMAL)
+		this.assets      = this.generalLedger.subAccount('Assets', ACCOUNT_TYPE.DEBIT_NORMAL)
+		this.liabilities = this.generalLedger.subAccount('Liabilities', ACCOUNT_TYPE.CREDIT_NORMAL)
+		this.income      = this.generalLedger.subAccount('Income',      ACCOUNT_TYPE.CREDIT_NORMAL)
+		this.expenses    = this.generalLedger.subAccount('Expenses',    ACCOUNT_TYPE.DEBIT_NORMAL)
+		this.equity      = this.generalLedger.subAccount('Equity',      ACCOUNT_TYPE.DEBIT_NORMAL)
+	}
+
+	toString() {
+		return `-= Chart of Accounts =-\n${this.generalLedger.print('')}`
+	}
 
 }

@@ -41,8 +41,9 @@ export default class Account {
 		}, this._credit_total)
 	}
 
-	subAccount(name: string, acctType: ACCOUNT_TYPE) {
-		let sub = new Account(name, acctType)
+	subAccount(name: string, accountType?: ACCOUNT_TYPE) {
+		if (arguments.length < 2) accountType = this.accountType
+		let sub = new Account(name, accountType)
 		this.subAccounts.push(sub)
 		return sub
 	}
@@ -75,6 +76,19 @@ export default class Account {
 			stmt.balance += stmt.subAccounts[this.subAccounts[i].name].balance
 		}
 		return stmt
+	}
+
+	print(prefix: string = '', indent: string = '  ') {
+		let acct = `${prefix}${this.name} $${this.balance}\n`
+		for (let i=0; i<this.subAccounts.length; i++) {
+			acct += this.subAccounts[i].print(`${prefix}${indent}`,indent)
+		}
+		if (this.subAccounts.length > 0) acct.replace(/\n$/,'')
+		return acct
+	}
+
+	toString() {
+		return this.print()
 	}
 
 }

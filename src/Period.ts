@@ -64,4 +64,15 @@ export default class Period {
 		}
 		return this.financialStatements.incomeStatement
 	}
+
+	printJournal() {
+		//               $xXXX,XXX.XX $xXXX,XXX.XX 
+		let journal = `\t      Debits     Credits\n`
+		for (let i=0; i<this.journal.length; i++) {
+			journal += this.journal[i].print(12,2,`\t`)
+		}
+		return journal.replace(/\n$/,'')
+	}
+	toString() { return this.printJournal() }
+
 }

@@ -78,12 +78,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	var ACCOUNT_TYPE_1 = __webpack_require__(3);
 	var ChartOfAccounts = (function () {
 	    function ChartOfAccounts() {
-	        this.assets = new Account_1.default('Assets', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
-	        this.liabilities = new Account_1.default('Liabilities', ACCOUNT_TYPE_1.default.CREDIT_NORMAL);
-	        this.income = new Account_1.default('Income', ACCOUNT_TYPE_1.default.CREDIT_NORMAL);
-	        this.expenses = new Account_1.default('Expenses', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
-	        this.equity = new Account_1.default('Equity', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
+	        this.generalLedger = new Account_1.default('GeneralLedger', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
+	        this.assets = this.generalLedger.subAccount('Assets', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
+	        this.liabilities = this.generalLedger.subAccount('Liabilities', ACCOUNT_TYPE_1.default.CREDIT_NORMAL);
+	        this.income = this.generalLedger.subAccount('Income', ACCOUNT_TYPE_1.default.CREDIT_NORMAL);
+	        this.expenses = this.generalLedger.subAccount('Expenses', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
+	        this.equity = this.generalLedger.subAccount('Equity', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
 	    }
+	    ChartOfAccounts.prototype.toString = function () {
+	        return "-= Chart of Accounts =-\n" + this.generalLedger.print('');
+	    };
 	    return ChartOfAccounts;
 	}());
 	exports.default = ChartOfAccounts;
@@ -150,8 +154,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        enumerable: true,
 	        configurable: true
 	    });
-	    Account.prototype.subAccount = function (name, acctType) {
-	        var sub = new Account(name, acctType);
+	    Account.prototype.subAccount = function (name, accountType) {
+	        if (arguments.length < 2)
+	            accountType = this.accountType;
+	        var sub = new Account(name, accountType);
 	        this.subAccounts.push(sub);
 	        return sub;
 	    };
@@ -193,6 +199,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        enumerable: true,
 	        configurable: true
 	    });
+	    Account.prototype.print = function (prefix, indent) {
+	        if (prefix === void 0) { prefix = ''; }
+	        if (indent === void 0) { indent = '  '; }
+	        var acct = "" + prefix + this.name + " $" + this.balance + "\n";
+	        for (var i = 0; i < this.subAccounts.length; i++) {
+	            acct += this.subAccounts[i].print("" + prefix + indent, indent);
+	        }
+	        if (this.subAccounts.length > 0)
+	            acct.replace(/\n$/, '');
+	        return acct;
+	    };
+	    Account.prototype.toString = function () {
+	        return this.print();
+	    };
 	    return Account;
 	}());
 	exports.default = Account;
@@ -270,6 +290,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        enumerable: true,
 	        configurable: true
 	    });
+	    Period.prototype.printJournal = function () {
+	        //               $XXXXXXXX.XX $XXXXXXXX.XX 
+	        var journal = "\t      Debits     Credits\n";
+	        for (var i = 0; i < this.journal.length; i++) {
+	            journal += this.journal[i].print(12, 2, "\t");
+	        }
+	        return journal.replace(/\n$/, '');
+	    };
+	    Period.prototype.toString = function () { return this.printJournal(); };
 	    return Period;
 	}());
 	exports.default = Period;
@@ -299,6 +328,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (debit_total != credit_total)
 	            throw new Error("Debits (" + debit_total + ") != Credits (" + credit_total + ")");
 	    }
+	    JournalEntry.prototype.print = function (maxLen, decimals, indent) {
+	        if (maxLen === void 0) { maxLen = 12; }
+	        if (decimals === void 0) { decimals = 2; }
+	        if (indent === void 0) { indent = "\t"; }
+	        var placeholder = '';
+	        while (placeholder.length < maxLen)
+	            placeholder += ' ';
+	        var fmtNum = function (num) {
+	            var fmtd = num.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+	            fmtd = fmtd.substring(0, Math.max(fmtd.length, maxLen));
+	            while (fmtd.length < maxLen)
+	                fmtd = " " + fmtd;
+	            return fmtd;
+	        };
+	        var je = this.description + "\n";
+	        for (var i = 0; i < this.debits.length; i++) {
+	            var v = this.debits[i];
+	            je += "" + indent + fmtNum(v.amount) + placeholder + "  " + v.account.name + "\n";
+	        }
+	        for (var i = 0; i < this.credits.length; i++) {
+	            var v = this.credits[i];
+	            je += "" + indent + placeholder + fmtNum(v.amount) + "  " + v.account.name + "\n";
+	        }
+	        return je;
+	    };
+	    JournalEntry.prototype.toString = function () { return this.print(); };
 	    return JournalEntry;
 	}());
 	exports.default = JournalEntry;
