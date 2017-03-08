@@ -12,15 +12,16 @@ export default class ChartOfAccounts {
 
 	constructor() { 
 		this.generalLedger = new Account('GeneralLedger', ACCOUNT_TYPE.DEBIT_NORMAL)
-		this.assets      = this.generalLedger.subAccount('Assets', ACCOUNT_TYPE.DEBIT_NORMAL)
+		// https://en.wikipedia.org/wiki/Normal_balance
+		this.assets      = this.generalLedger.subAccount('Assets',      ACCOUNT_TYPE.DEBIT_NORMAL)
 		this.liabilities = this.generalLedger.subAccount('Liabilities', ACCOUNT_TYPE.CREDIT_NORMAL)
+		this.equity      = this.generalLedger.subAccount('Equity',      ACCOUNT_TYPE.CREDIT_NORMAL)
 		this.income      = this.generalLedger.subAccount('Income',      ACCOUNT_TYPE.CREDIT_NORMAL)
 		this.expenses    = this.generalLedger.subAccount('Expenses',    ACCOUNT_TYPE.DEBIT_NORMAL)
-		this.equity      = this.generalLedger.subAccount('Equity',      ACCOUNT_TYPE.DEBIT_NORMAL)
 	}
 
 	toString() {
-		return `-= Chart of Accounts =-\n${this.generalLedger.print('')}`
+		return this.generalLedger.print('')
 	}
 
 }

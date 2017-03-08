@@ -1,19 +1,16 @@
 import Account from './Account'
 import ChartOfAccounts from './ChartOfAccounts'
+import Report from './Report'
 
-export default class BalanceSheet {
+export default class BalanceSheet extends Report {
 
-	readonly subAccounts: any = {}
 	private _netWorth: number = 0
 
 	constructor(coa: ChartOfAccounts) {
-		let bsaccts = [coa.assets, coa.liabilities, coa.equity]
-		for (let i in bsaccts) {
-			let acct = bsaccts[i]
-			this.subAccounts[bsaccts[i].name] = bsaccts[i].statement
-		}
-		this._netWorth = this.subAccounts[coa.assets.name].balance - this.subAccounts[coa.liabilities.name].balance
+		super(coa.assets.balance - coa.liabilities.balance, [coa.assets, coa.liabilities, coa.equity])
 	}
-	get netWorth() { return this._netWorth }
-	get balance() { return this._netWorth }
+	get netWorth() { return this.balance }
+	toString() {
+		return this.print('Net Worth')
+	}
 }

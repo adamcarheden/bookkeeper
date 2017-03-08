@@ -109,21 +109,21 @@ declare module 'BookKeeper/JournalEntry' {
 
 declare module 'BookKeeper/IncomeStatement' {
     import ChartOfAccounts from 'BookKeeper/ChartOfAccounts';
-    export default class IncomeStatement {
-        readonly subAccounts: any;
+    import Report from 'BookKeeper/Report';
+    export default class IncomeStatement extends Report {
         constructor(coa: ChartOfAccounts);
         readonly netIncome: number;
-        readonly balance: number;
+        toString(): string;
     }
 }
 
 declare module 'BookKeeper/BalanceSheet' {
     import ChartOfAccounts from 'BookKeeper/ChartOfAccounts';
-    export default class BalanceSheet {
-        readonly subAccounts: any;
+    import Report from 'BookKeeper/Report';
+    export default class BalanceSheet extends Report {
         constructor(coa: ChartOfAccounts);
         readonly netWorth: number;
-        readonly balance: number;
+        toString(): string;
     }
 }
 
@@ -135,5 +135,24 @@ declare module 'BookKeeper/FinancialStatements' {
         readonly balanceSheet: BalanceSheet;
         constructor(incomeStatement: IncomeStatement, balanceSheet: BalanceSheet);
     }
+}
+
+declare module 'BookKeeper/Report' {
+    import Account from 'BookKeeper/Account';
+    interface lineItem {
+        name: string;
+        balance: number;
+    }
+    let printReport: (items: lineItem[]) => string;
+    abstract class Report {
+        readonly balance: number;
+        readonly subAccounts: {
+            [id: string]: Account;
+        };
+        constructor(balance: number, accts: Account[]);
+        print(summary?: string): string;
+        toString(): string;
+    }
+    export { Report as default, lineItem, printReport };
 }
 

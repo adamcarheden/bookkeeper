@@ -1,20 +1,16 @@
 import Account from './Account'
 import ChartOfAccounts from './ChartOfAccounts'
+import Report from './Report'
 
-export default class IncomeStatement {
+export default class IncomeStatement extends Report {
 
-	readonly subAccounts: any = {}
 	private _netIncome: number = 0
 
 	constructor(coa: ChartOfAccounts) {
-		let isaccts = [coa.income, coa.expenses]
-		for (let i in isaccts) {
-			let acct = isaccts[i]
-			this.subAccounts[isaccts[i].name] = isaccts[i].statement
-		}	
-		this._netIncome = this.subAccounts[coa.income.name].balance - this.subAccounts[coa.expenses.name].balance
+		super(coa.income.balance - coa.expenses.balance, [coa.income, coa.expenses])
 	}
-	get netIncome() { return this._netIncome }
-	get balance() { return this._netIncome }
-
+	get netIncome() { return this.balance }
+	toString() {
+		return this.print('Profit/(Loss)')
+	}
 }

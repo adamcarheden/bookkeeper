@@ -57,8 +57,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var ChartOfAccounts_1 = __webpack_require__(1);
-	var Period_1 = __webpack_require__(4);
-	var BankruptError_1 = __webpack_require__(9);
+	var Period_1 = __webpack_require__(5);
+	var BankruptError_1 = __webpack_require__(10);
 	var ACCOUNT_TYPE_1 = __webpack_require__(3);
 	exports.default = {
 	    ChartOfAccounts: ChartOfAccounts_1.default,
@@ -79,14 +79,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	var ChartOfAccounts = (function () {
 	    function ChartOfAccounts() {
 	        this.generalLedger = new Account_1.default('GeneralLedger', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
+	        // https://en.wikipedia.org/wiki/Normal_balance
 	        this.assets = this.generalLedger.subAccount('Assets', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
 	        this.liabilities = this.generalLedger.subAccount('Liabilities', ACCOUNT_TYPE_1.default.CREDIT_NORMAL);
+	        this.equity = this.generalLedger.subAccount('Equity', ACCOUNT_TYPE_1.default.CREDIT_NORMAL);
 	        this.income = this.generalLedger.subAccount('Income', ACCOUNT_TYPE_1.default.CREDIT_NORMAL);
 	        this.expenses = this.generalLedger.subAccount('Expenses', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
-	        this.equity = this.generalLedger.subAccount('Equity', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
 	    }
 	    ChartOfAccounts.prototype.toString = function () {
-	        return "-= Chart of Accounts =-\n" + this.generalLedger.print('');
+	        return this.generalLedger.print('');
 	    };
 	    return ChartOfAccounts;
 	}());
@@ -100,6 +101,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var ACCOUNT_TYPE_1 = __webpack_require__(3);
+	var Report_1 = __webpack_require__(4);
 	var Account = (function () {
 	    function Account(name, accountType) {
 	        this.name = name;
@@ -199,16 +201,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        enumerable: true,
 	        configurable: true
 	    });
+	    Account.prototype._prepForPrint = function (prefix, indent) {
+	        if (prefix === void 0) { prefix = ''; }
+	        if (indent === void 0) { indent = '  '; }
+	        var acct = [{ name: "" + prefix + this.name, balance: this.balance }];
+	        for (var i = 0; i < this.subAccounts.length; i++) {
+	            acct = acct.concat(this.subAccounts[i]._prepForPrint("" + prefix + indent, indent));
+	        }
+	        return acct;
+	    };
 	    Account.prototype.print = function (prefix, indent) {
 	        if (prefix === void 0) { prefix = ''; }
 	        if (indent === void 0) { indent = '  '; }
-	        var acct = "" + prefix + this.name + " $" + this.balance + "\n";
-	        for (var i = 0; i < this.subAccounts.length; i++) {
-	            acct += this.subAccounts[i].print("" + prefix + indent, indent);
-	        }
-	        if (this.subAccounts.length > 0)
-	            acct.replace(/\n$/, '');
-	        return acct;
+	        return Report_1.printReport(this._prepForPrint(prefix, indent));
 	    };
 	    Account.prototype.toString = function () {
 	        return this.print();
@@ -234,14 +239,79 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
+/***/ function(module, exports) {
+
+	"use strict";
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var digits = function (num) {
+	    return num.toFixed(2).split(/\./)[0].length;
+	};
+	var printReport = function (items) {
+	    var max = 0;
+	    var balMax = 0;
+	    return items.map(function (item) {
+	        var bal = item.balance.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+	        if (item.balance < 0) {
+	            bal.replace(/-/, '(');
+	            bal += ')';
+	        }
+	        var i = {
+	            name: item.name,
+	            balance: bal,
+	        };
+	        max = Math.max(max, item.name.length);
+	        balMax = Math.max(balMax, i.balance.length);
+	        return i;
+	    }).map(function (item) {
+	        var lbl = item.name;
+	        while (lbl.length < max)
+	            lbl += ' ';
+	        var padLen = balMax - item.balance.length;
+	        var pad = '';
+	        while (pad.length < padLen)
+	            pad += ' ';
+	        var bal = item.balance.replace(/\$/, "$" + pad);
+	        return lbl.substring(0, max) + "\t" + bal;
+	    }).join("\n");
+	};
+	exports.printReport = printReport;
+	var Report = (function () {
+	    function Report(balance, accts) {
+	        this.balance = balance;
+	        this.subAccounts = {};
+	        for (var i in accts) {
+	            var acct = accts[i];
+	            this.subAccounts[accts[i].name] = accts[i].statement;
+	        }
+	    }
+	    Report.prototype.print = function (summary) {
+	        var _this = this;
+	        if (summary === void 0) { summary = 'Total'; }
+	        var accts = [];
+	        Object.keys(this.subAccounts).forEach(function (acct) {
+	            accts.push({ name: acct, balance: _this.subAccounts[acct].balance });
+	        });
+	        accts.push({ name: summary, balance: this.balance });
+	        return printReport(accts);
+	    };
+	    Report.prototype.toString = function () {
+	        return this.print();
+	    };
+	    return Report;
+	}());
+	exports.default = Report;
+
+
+/***/ },
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
-	var JournalEntry_1 = __webpack_require__(5);
-	var IncomeStatement_1 = __webpack_require__(6);
-	var BalanceSheet_1 = __webpack_require__(7);
-	var FinancialStatements_1 = __webpack_require__(8);
+	var JournalEntry_1 = __webpack_require__(6);
+	var IncomeStatement_1 = __webpack_require__(7);
+	var BalanceSheet_1 = __webpack_require__(8);
+	var FinancialStatements_1 = __webpack_require__(9);
 	var Period = (function () {
 	    function Period(period, coa, autoClose) {
 	        this.period = period;
@@ -291,12 +361,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        configurable: true
 	    });
 	    Period.prototype.printJournal = function () {
-	        //               $XXXXXXXX.XX $XXXXXXXX.XX 
-	        var journal = "\t      Debits     Credits\n";
+	        //               $xXXX,XXX.XX $xXXX,XXX.XX 
+	        var journal = ["\t      Debits     Credits  Account"];
 	        for (var i = 0; i < this.journal.length; i++) {
-	            journal += this.journal[i].print(12, 2, "\t");
+	            journal.push(this.journal[i].print(12, 2, "\t"));
 	        }
-	        return journal.replace(/\n$/, '');
+	        return journal.join("\n");
 	    };
 	    Period.prototype.toString = function () { return this.printJournal(); };
 	    return Period;
@@ -305,7 +375,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -360,71 +430,81 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 6 */
-/***/ function(module, exports) {
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
+	var __extends = (this && this.__extends) || (function () {
+	    var extendStatics = Object.setPrototypeOf ||
+	        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+	        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+	    return function (d, b) {
+	        extendStatics(d, b);
+	        function __() { this.constructor = d; }
+	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	    };
+	})();
 	Object.defineProperty(exports, "__esModule", { value: true });
-	var IncomeStatement = (function () {
+	var Report_1 = __webpack_require__(4);
+	var IncomeStatement = (function (_super) {
+	    __extends(IncomeStatement, _super);
 	    function IncomeStatement(coa) {
-	        this.subAccounts = {};
-	        this._netIncome = 0;
-	        var isaccts = [coa.income, coa.expenses];
-	        for (var i in isaccts) {
-	            var acct = isaccts[i];
-	            this.subAccounts[isaccts[i].name] = isaccts[i].statement;
-	        }
-	        this._netIncome = this.subAccounts[coa.income.name].balance - this.subAccounts[coa.expenses.name].balance;
+	        var _this = _super.call(this, coa.income.balance - coa.expenses.balance, [coa.income, coa.expenses]) || this;
+	        _this._netIncome = 0;
+	        return _this;
 	    }
 	    Object.defineProperty(IncomeStatement.prototype, "netIncome", {
-	        get: function () { return this._netIncome; },
+	        get: function () { return this.balance; },
 	        enumerable: true,
 	        configurable: true
 	    });
-	    Object.defineProperty(IncomeStatement.prototype, "balance", {
-	        get: function () { return this._netIncome; },
-	        enumerable: true,
-	        configurable: true
-	    });
+	    IncomeStatement.prototype.toString = function () {
+	        return this.print('Profit/(Loss)');
+	    };
 	    return IncomeStatement;
-	}());
+	}(Report_1.default));
 	exports.default = IncomeStatement;
 
 
 /***/ },
-/* 7 */
-/***/ function(module, exports) {
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
+	var __extends = (this && this.__extends) || (function () {
+	    var extendStatics = Object.setPrototypeOf ||
+	        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+	        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+	    return function (d, b) {
+	        extendStatics(d, b);
+	        function __() { this.constructor = d; }
+	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	    };
+	})();
 	Object.defineProperty(exports, "__esModule", { value: true });
-	var BalanceSheet = (function () {
+	var Report_1 = __webpack_require__(4);
+	var BalanceSheet = (function (_super) {
+	    __extends(BalanceSheet, _super);
 	    function BalanceSheet(coa) {
-	        this.subAccounts = {};
-	        this._netWorth = 0;
-	        var bsaccts = [coa.assets, coa.liabilities, coa.equity];
-	        for (var i in bsaccts) {
-	            var acct = bsaccts[i];
-	            this.subAccounts[bsaccts[i].name] = bsaccts[i].statement;
-	        }
-	        this._netWorth = this.subAccounts[coa.assets.name].balance - this.subAccounts[coa.liabilities.name].balance;
+	        var _this = _super.call(this, coa.assets.balance - coa.liabilities.balance, [coa.assets, coa.liabilities, coa.equity]) || this;
+	        _this._netWorth = 0;
+	        return _this;
 	    }
 	    Object.defineProperty(BalanceSheet.prototype, "netWorth", {
-	        get: function () { return this._netWorth; },
+	        get: function () { return this.balance; },
 	        enumerable: true,
 	        configurable: true
 	    });
-	    Object.defineProperty(BalanceSheet.prototype, "balance", {
-	        get: function () { return this._netWorth; },
-	        enumerable: true,
-	        configurable: true
-	    });
+	    BalanceSheet.prototype.toString = function () {
+	        return this.print('Net Worth');
+	    };
 	    return BalanceSheet;
-	}());
+	}(Report_1.default));
 	exports.default = BalanceSheet;
 
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -440,7 +520,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	"use strict";

@@ -67,11 +67,11 @@ export default class Period {
 
 	printJournal() {
 		//               $xXXX,XXX.XX $xXXX,XXX.XX 
-		let journal = `\t      Debits     Credits\n`
+		let journal: string[] = [`\t      Debits     Credits  Account`]
 		for (let i=0; i<this.journal.length; i++) {
-			journal += this.journal[i].print(12,2,`\t`)
+			journal.push(this.journal[i].print(12,2,`\t`))
 		}
-		return journal.replace(/\n$/,'')
+		return journal.join(`\n`)
 	}
 	toString() { return this.printJournal() }
 

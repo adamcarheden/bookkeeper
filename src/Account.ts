@@ -1,5 +1,6 @@
 import ChartOfAccounts from './ChartOfAccounts'
 import ACCOUNT_TYPE from './ACCOUNT_TYPE'
+import { printReport, lineItem } from './Report'
 
 export default class Account {
 
@@ -78,13 +79,15 @@ export default class Account {
 		return stmt
 	}
 
-	print(prefix: string = '', indent: string = '  ') {
-		let acct = `${prefix}${this.name} $${this.balance}\n`
+	private _prepForPrint(prefix: string = '', indent: string = '  ') {
+		let acct: lineItem[] = [{ name: `${prefix}${this.name}`, balance: this.balance }]
 		for (let i=0; i<this.subAccounts.length; i++) {
-			acct += this.subAccounts[i].print(`${prefix}${indent}`,indent)
+			acct = acct.concat(this.subAccounts[i]._prepForPrint(`${prefix}${indent}`, indent))
 		}
-		if (this.subAccounts.length > 0) acct.replace(/\n$/,'')
 		return acct
+	}
+	print(prefix: string = '', indent: string = '  ') {
+		return printReport(this._prepForPrint(prefix, indent))
 	}
 
 	toString() {
