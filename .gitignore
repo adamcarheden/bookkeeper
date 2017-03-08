@@ -3,3 +3,5 @@ bower_components/
 npm-debug.log
 selenium-debug.log
 *.swp
+test/BookKeeper/*.js
+test/BookKeeper/*.js.map

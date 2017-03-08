@@ -7,8 +7,9 @@
     "lint": "eslint --ext .js src",
     "build": "rm -f BookKeeper.d.ts; webpack --config build/webpack.config.js && babili BookKeeper.js -o BookKeeper.min.js && dts-bundle --name BookKeeper --main src/BookKeeper.d.ts --out ../BookKeeper.d.ts --baseDir src/; rm src/*.d.ts",
     "lint-test": "eslint --ext .js test",
-    "test-debug": "tape -r babel-register test/unit/*.js",
-    "test": "npm run lint-test && tape -r babel-register test/unit/*.js | faucet"
+		"compile-testing": "rm -f test/BookKeeper/*.js && tsc src/*.ts --sourceMap --target ES2015 --outDir test/BookKeeper/",
+    "test-debug": "npm run compile-testing && tape -r babel-register test/unit/*.js",
+    "test": "npm run compile-testing && npm run lint-test && tape -r babel-register test/unit/*.js | faucet"
   },
   "author": {
     "name": "Adam Carheden",
