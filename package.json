@@ -7,9 +7,11 @@
     "lint": "eslint --ext .js src",
     "build": "rm -f BookKeeper.d.ts; webpack --config build/webpack.config.js && babili BookKeeper.js -o BookKeeper.min.js && dts-bundle --name BookKeeper --main src/BookKeeper.d.ts --out ../BookKeeper.d.ts --baseDir src/; rm src/*.d.ts",
     "lint-test": "eslint --ext .js test",
-		"compile-testing": "rm -f test/BookKeeper/*.js && tsc src/*.ts --sourceMap --target ES2015 --outDir test/BookKeeper/",
+    "compile-testing": "rm -f test/BookKeeper/*.js && tsc src/*.ts --sourceMap --target ES2015 --outDir test/BookKeeper/",
     "test-debug": "npm run compile-testing && tape -r babel-register test/unit/*.js",
-    "test": "npm run compile-testing && npm run lint-test && tape -r babel-register test/unit/*.js | faucet"
+    "test": "npm run compile-testing && npm run lint-test && tape -r babel-register test/unit/*.js | faucet",
+    "examples": "for ex in examples/*.js; do echo \"========== $ex ==========\"; babel-node $ex; done",
+    "doc": "rm -f README.md && node doc/makedoc.js doc/README.md.in > README.md && chmod 444 README.md"
   },
   "author": {
     "name": "Adam Carheden",
@@ -37,6 +39,7 @@
     "eslint-plugin-promise": "^3.4.0",
     "eslint-plugin-standard": "^2.0.1",
     "faucet": "0.0.1",
+    "rosetta-markdown": "^1.0.1",
     "tap-webpack-plugin": "^1.1.0",
     "tape": "^4.6.2",
     "ts-loader": "^2.0.1",
