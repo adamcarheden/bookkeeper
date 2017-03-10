@@ -27,13 +27,17 @@ export default class Period {
 					if (coa.assets.balance < -pnl) throw new Error(`You're bankrupt!`)
 					debits.push({amount: pnl, account: coa.equity})
 				}
-				this.journalEntryComplex('Close Period', debits, credits)
+				this.compoundJournalEntry('Close Period', debits, credits)
 			}
 		this.closed = false
 	}
-	close(closer: closeFunction) {
+	close(closer?: closeFunction) {
 		const incomeStatement = new IncomeStatement(this.coa)
-		closer()
+		if (arguments.length >= 1) {
+			closer()
+		} else {
+			this.autoClose()
+		}
 		let isaccts = [this.coa.income, this.coa.expenses]
 		for (let i = 0; i<isaccts.length; i++) {
 			if (isaccts[i].balance !== 0) throw new Error(`Income Statement account '${isaccts[i].name}' has non-zero balance $${isaccts[i].balance} after close`)
@@ -49,13 +53,13 @@ export default class Period {
 		debit: Account,
 		credit: Account
 	) {
-		this.journalEntryComplex(
+		this.compoundJournalEntry(
 			description,
 			[{ amount: amount, account: debit }],
 			[{ amount: amount, account: credit }],
 		)
 	}
-	journalEntryComplex(
+	compoundJournalEntry(
 		description: string,
 		debits: JournalEntryItem[],
 		credits: JournalEntryItem[]
