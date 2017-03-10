@@ -44,9 +44,9 @@ declare module 'BookKeeper/Period' {
         closed: boolean;
         financialStatements: FinancialStatements;
         constructor(period: any, coa: ChartOfAccounts, autoClose?: closeFunction);
-        close(closer: closeFunction): void;
+        close(closer?: closeFunction): void;
         journalEntry(description: string, amount: number, debit: Account, credit: Account): void;
-        journalEntryComplex(description: string, debits: JournalEntryItem[], credits: JournalEntryItem[]): void;
+        compoundJournalEntry(description: string, debits: JournalEntryItem[], credits: JournalEntryItem[]): void;
         readonly balanceSheet: BalanceSheet;
         readonly incomeStatement: IncomeStatement;
         printJournal(): string;

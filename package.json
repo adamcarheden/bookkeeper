@@ -10,7 +10,8 @@
     "compile-testing": "rm -f test/BookKeeper/*.js && tsc src/*.ts --sourceMap --target ES2015 --outDir test/BookKeeper/",
     "test-debug": "npm run compile-testing && tape -r babel-register test/unit/*.js",
     "test": "npm run compile-testing && npm run lint-test && tape -r babel-register test/unit/*.js | faucet",
-    "examples": "for ex in examples/*.js; do echo \"========== $ex ==========\"; babel-node $ex; done",
+    "examples": "npm run lint-examples && for ex in examples/*.js; do echo \"========== $ex ==========\"; babel-node $ex; done",
+    "lint-examples": "eslint --ext .js examples",
     "doc": "rm -f README.md && node doc/makedoc.js doc/README.md.in > README.md && chmod 444 README.md"
   },
   "author": {

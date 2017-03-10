@@ -251,9 +251,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var balMax = 0;
 	    return items.map(function (item) {
 	        var bal = item.balance.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+	        bal = bal.replace(/\$/, '$ ');
 	        if (item.balance < 0) {
-	            bal.replace(/-/, '(');
-	            bal += ')';
+	            bal = bal.replace(/-/, '').replace(/ /, '(') + ')';
+	        }
+	        else {
+	            bal = bal + " ";
 	        }
 	        var i = {
 	            name: item.name,
@@ -334,13 +337,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        throw new Error("You're bankrupt!");
 	                    debits.push({ amount: pnl, account: coa.equity });
 	                }
-	                _this.journalEntryComplex('Close Period', debits, credits);
+	                _this.compoundJournalEntry('Close Period', debits, credits);
 	            };
 	        this.closed = false;
 	    }
 	    Period.prototype.close = function (closer) {
 	        var incomeStatement = new IncomeStatement_1.default(this.coa);
-	        closer();
+	        if (arguments.length >= 1) {
+	            closer();
+	        }
+	        else {
+	            this.autoClose();
+	        }
 	        var isaccts = [this.coa.income, this.coa.expenses];
 	        for (var i = 0; i < isaccts.length; i++) {
 	            if (isaccts[i].balance !== 0)
@@ -351,9 +359,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.financialStatements = new FinancialStatements_1.default(incomeStatement, balanceSheet);
 	    };
 	    Period.prototype.journalEntry = function (description, amount, debit, credit) {
-	        this.journalEntryComplex(description, [{ amount: amount, account: debit }], [{ amount: amount, account: credit }]);
+	        this.compoundJournalEntry(description, [{ amount: amount, account: debit }], [{ amount: amount, account: credit }]);
 	    };
-	    Period.prototype.journalEntryComplex = function (description, debits, credits) {
+	    Period.prototype.compoundJournalEntry = function (description, debits, credits) {
 	        this.journal.push(new JournalEntry_1.default(description, debits, credits));
 	    };
 	    Object.defineProperty(Period.prototype, "balanceSheet", {

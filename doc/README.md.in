@@ -26,7 +26,11 @@ git clone https://github.com/adamcarheden/bookkeeper.git
 ### Basic
 {{{../examples/basic.js}}}
 
+### Complete example
+{{{../examples/complex.js}}}
+
 ### Custom Chart of Acounts
+**TO BE WRITTE**
 
 ## Chart of Accounts
 The BookKeeper ChartOfAccounts object contains the following accounts:
@@ -42,16 +46,18 @@ The BookKeeper ChartOfAccounts object contains the following accounts:
 Assets, liabilities and equity end up on the balance sheet. Income and expenses end up on the income statement and should be zeroed out to balance sheet accounts at close.
 
 ## Roadmap
+It does what I want it to, so I have no plans to develop it further. It could use dates in the journal entries that auto-map to some predefined periods though. A more thorough unit testing regime would also probably be a good idea.
 
 ## Current State
 
-Alpha. It seems to work but has somewhat sparse unit testing. It's also missing featres like dates -- journal entries fall in a specific period, but don't have a specific date associated with them.
+Alpha. It seems to work but has somewhat sparse unit testing.
 
 ## Contributing
 ``` bash
 git clone https://github.com/adamcarheden/bookkeeper.git
 cd bookkeeper
 npm run build
+npm run examples
 npm run test
 ```
 PRs welcome.
