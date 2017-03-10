@@ -17,6 +17,8 @@ let printReport = function(items: lineItem[]) {
 		if (item.balance < 0) {
 			bal = bal.replace(/-/,'(')
 			bal += ')'
+		} else {
+			bal = ` ${bal} `
 		}
 		let i = { 
 			name: item.name,
