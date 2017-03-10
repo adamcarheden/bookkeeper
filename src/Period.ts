@@ -17,7 +17,18 @@ export default class Period {
 	constructor(readonly period: any, readonly coa: ChartOfAccounts, autoClose?: closeFunction) {
 		this.autoClose = typeof autoClose === 'function'
 			? autoClose
-			: function() { throw new Error('You called balanceSheet or incomeStatement prior to closing the period, but you did not provide an autoClose function at instantiation') }
+			: () => { 
+				let debits = [{amount: coa.income.balance, account: coa.income }]
+				let credits = [{amount: coa.expenses.balance, account: coa.expenses }]
+				let pnl = coa.income.balance - coa.expenses.balance
+				if (pnl > 0) {
+					credits.push({amount: pnl, account: coa.equity})
+				} else if (pnl < 0) {
+					if (coa.assets.balance < -pnl) throw new Error(`You're bankrupt!`)
+					debits.push({amount: pnl, account: coa.equity})
+				}
+				this.journalEntryComplex('Close Period', debits, credits)
+			}
 		this.closed = false
 	}
 	close(closer: closeFunction) {
