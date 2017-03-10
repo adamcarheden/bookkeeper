@@ -15,7 +15,7 @@ let printReport = function(items: lineItem[]) {
 	return items.map((item: lineItem) => {
 		let bal = item.balance.toLocaleString('en-US', {style: 'currency', currency: 'USD' })
 		if (item.balance < 0) {
-			bal.replace(/-/,'(')
+			bal = bal.replace(/-/,'(')
 			bal += ')'
 		}
 		let i = { 
