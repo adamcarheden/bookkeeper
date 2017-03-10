@@ -14,11 +14,11 @@ let printReport = function(items: lineItem[]) {
 	let balMax = 0
 	return items.map((item: lineItem) => {
 		let bal = item.balance.toLocaleString('en-US', {style: 'currency', currency: 'USD' })
+		bal = bal.replace(/\$/,'$ ')
 		if (item.balance < 0) {
-			bal = bal.replace(/-/,'(')
-			bal += ')'
+			bal = bal.replace(/-/,'').replace(/ /,'(') + ')'
 		} else {
-			bal = ` ${bal} `
+			bal = `${bal} `
 		}
 		let i = { 
 			name: item.name,
