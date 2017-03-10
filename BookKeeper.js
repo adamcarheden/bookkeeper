@@ -284,14 +284,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.subAccounts[accts[i].name] = accts[i].statement;
 	        }
 	    }
-	    Report.prototype.print = function (summary) {
+	    Report.prototype.print = function (summary, postTotalAccounts) {
 	        var _this = this;
 	        if (summary === void 0) { summary = 'Total'; }
+	        if (postTotalAccounts === void 0) { postTotalAccounts = []; }
 	        var accts = [];
 	        Object.keys(this.subAccounts).forEach(function (acct) {
 	            accts.push({ name: acct, balance: _this.subAccounts[acct].balance });
 	        });
 	        accts.push({ name: summary, balance: this.balance });
+	        accts = accts.concat(postTotalAccounts);
 	        return printReport(accts);
 	    };
 	    Report.prototype.toString = function () {
@@ -314,12 +316,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	var FinancialStatements_1 = __webpack_require__(9);
 	var Period = (function () {
 	    function Period(period, coa, autoClose) {
+	        var _this = this;
 	        this.period = period;
 	        this.coa = coa;
 	        this.journal = [];
 	        this.autoClose = typeof autoClose === 'function'
 	            ? autoClose
-	            : function () { throw new Error('You called balanceSheet or incomeStatement prior to closing the period, but you did not provide an autoClose function at instantiation'); };
+	            : function () {
+	                var debits = [{ amount: coa.income.balance, account: coa.income }];
+	                var credits = [{ amount: coa.expenses.balance, account: coa.expenses }];
+	                var pnl = coa.income.balance - coa.expenses.balance;
+	                if (pnl > 0) {
+	                    credits.push({ amount: pnl, account: coa.equity });
+	                }
+	                else if (pnl < 0) {
+	                    if (coa.assets.balance < -pnl)
+	                        throw new Error("You're bankrupt!");
+	                    debits.push({ amount: pnl, account: coa.equity });
+	                }
+	                _this.journalEntryComplex('Close Period', debits, credits);
+	            };
 	        this.closed = false;
 	    }
 	    Period.prototype.close = function (closer) {
@@ -486,7 +502,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var BalanceSheet = (function (_super) {
 	    __extends(BalanceSheet, _super);
 	    function BalanceSheet(coa) {
-	        var _this = _super.call(this, coa.assets.balance - coa.liabilities.balance, [coa.assets, coa.liabilities, coa.equity]) || this;
+	        var _this = _super.call(this, coa.assets.balance - coa.liabilities.balance, [coa.assets, coa.liabilities]) || this;
+	        _this.coa = coa;
 	        _this._netWorth = 0;
 	        return _this;
 	    }
@@ -496,7 +513,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        configurable: true
 	    });
 	    BalanceSheet.prototype.toString = function () {
-	        return this.print('Net Worth');
+	        return this.print('Net Worth', [this.coa.equity]);
 	    };
 	    return BalanceSheet;
 	}(Report_1.default));

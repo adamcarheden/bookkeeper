@@ -121,6 +121,7 @@ declare module 'BookKeeper/BalanceSheet' {
     import ChartOfAccounts from 'BookKeeper/ChartOfAccounts';
     import Report from 'BookKeeper/Report';
     export default class BalanceSheet extends Report {
+        readonly coa: ChartOfAccounts;
         constructor(coa: ChartOfAccounts);
         readonly netWorth: number;
         toString(): string;
@@ -150,7 +151,7 @@ declare module 'BookKeeper/Report' {
             [id: string]: Account;
         };
         constructor(balance: number, accts: Account[]);
-        print(summary?: string): string;
+        print(summary?: string, postTotalAccounts?: lineItem[]): string;
         toString(): string;
     }
     export { Report as default, lineItem, printReport };

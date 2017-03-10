@@ -47,12 +47,13 @@ abstract class Report {
 		}
 	}	
 
-	print(summary: string = 'Total') {
+	print(summary: string = 'Total', postTotalAccounts: lineItem[] = []) {
 		let accts: lineItem[] = []
 		Object.keys(this.subAccounts).forEach((acct) => {
 			accts.push({name: acct, balance: this.subAccounts[acct].balance })
 		})
 		accts.push({ name: summary, balance: this.balance })
+		accts = accts.concat(postTotalAccounts)
 		return printReport(accts)
 	}
 	toString() {
