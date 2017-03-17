@@ -41,21 +41,28 @@ let printReport = function(items: lineItem[]) {
 abstract class Report {
 
 	readonly subAccounts: { [id: string] : Account } = {}
+	readonly equityAccounts: { [id: string] : Account } = {}
 
-	constructor(readonly balance: number, accts: Account[]) {
+	constructor(readonly balance: number, accts: Account[], equityAccts: Account[]) {
 		for (let i in accts) {
-			let acct = accts[i]
 			this.subAccounts[accts[i].name] = accts[i].statement
+		}
+		for (let i in equityAccts) {
+			this.equityAccounts[equityAccts[i].name] = equityAccts[i].statement
 		}
 	}	
 
-	print(summary: string = 'Total', postTotalAccounts: lineItem[] = []) {
+	print(summary: string = 'Total', equity: string = 'Equity') {
 		let accts: lineItem[] = []
 		Object.keys(this.subAccounts).forEach((acct) => {
 			accts.push({name: acct, balance: this.subAccounts[acct].balance })
 		})
 		accts.push({ name: summary, balance: this.balance })
-		accts = accts.concat(postTotalAccounts)
+		let eqSummary = 0
+		Object.keys(this.equityAccounts).forEach((acct) => {
+			eqSummary += this.equityAccounts[acct].balance
+		})
+		accts.push({ name: equity, balance: eqSummary })
 		return printReport(accts)
 	}
 	toString() {

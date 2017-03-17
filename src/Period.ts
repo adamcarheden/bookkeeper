@@ -64,6 +64,7 @@ export default class Period {
 		debits: JournalEntryItem[],
 		credits: JournalEntryItem[]
 	) {
+		if (this.closed) throw new Error('This period has already been closed. You may not add any additional journal entires.')
 		this.journal.push(new JournalEntry(description, debits, credits))
 	}
 

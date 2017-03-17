@@ -85,6 +85,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.equity = this.generalLedger.subAccount('Equity', ACCOUNT_TYPE_1.default.CREDIT_NORMAL);
 	        this.income = this.generalLedger.subAccount('Income', ACCOUNT_TYPE_1.default.CREDIT_NORMAL);
 	        this.expenses = this.generalLedger.subAccount('Expenses', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
+	        this.contraEquity = this.generalLedger.subAccount('Contra Equity', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
 	    }
 	    ChartOfAccounts.prototype.toString = function () {
 	        return this.generalLedger.print('');
@@ -279,24 +280,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	exports.printReport = printReport;
 	var Report = (function () {
-	    function Report(balance, accts) {
+	    function Report(balance, accts, equityAccts) {
 	        this.balance = balance;
 	        this.subAccounts = {};
+	        this.equityAccounts = {};
 	        for (var i in accts) {
-	            var acct = accts[i];
 	            this.subAccounts[accts[i].name] = accts[i].statement;
 	        }
+	        for (var i in equityAccts) {
+	            this.equityAccounts[equityAccts[i].name] = equityAccts[i].statement;
+	        }
 	    }
-	    Report.prototype.print = function (summary, postTotalAccounts) {
+	    Report.prototype.print = function (summary, equity) {
 	        var _this = this;
 	        if (summary === void 0) { summary = 'Total'; }
-	        if (postTotalAccounts === void 0) { postTotalAccounts = []; }
+	        if (equity === void 0) { equity = 'Equity'; }
 	        var accts = [];
 	        Object.keys(this.subAccounts).forEach(function (acct) {
 	            accts.push({ name: acct, balance: _this.subAccounts[acct].balance });
 	        });
 	        accts.push({ name: summary, balance: this.balance });
-	        accts = accts.concat(postTotalAccounts);
+	        var eqSummary = 0;
+	        Object.keys(this.equityAccounts).forEach(function (acct) {
+	            eqSummary += _this.equityAccounts[acct].balance;
+	        });
+	        accts.push({ name: equity, balance: eqSummary });
 	        return printReport(accts);
 	    };
 	    Report.prototype.toString = function () {
@@ -362,6 +370,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.compoundJournalEntry(description, [{ amount: amount, account: debit }], [{ amount: amount, account: credit }]);
 	    };
 	    Period.prototype.compoundJournalEntry = function (description, debits, credits) {
+	        if (this.closed)
+	            throw new Error('This period has already been closed. You may not add any additional journal entires.');
 	        this.journal.push(new JournalEntry_1.default(description, debits, credits));
 	    };
 	    Object.defineProperty(Period.prototype, "balanceSheet", {
@@ -473,7 +483,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var IncomeStatement = (function (_super) {
 	    __extends(IncomeStatement, _super);
 	    function IncomeStatement(coa) {
-	        var _this = _super.call(this, coa.income.balance - coa.expenses.balance, [coa.income, coa.expenses]) || this;
+	        var _this = _super.call(this, coa.income.balance - coa.expenses.balance, [coa.income, coa.expenses], [coa.contraEquity]) || this;
 	        _this._netIncome = 0;
 	        return _this;
 	    }
@@ -483,7 +493,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        configurable: true
 	    });
 	    IncomeStatement.prototype.toString = function () {
-	        return this.print('Profit/(Loss)');
+	        return this.print('Profit/(Loss)', 'Profits Taken');
 	    };
 	    return IncomeStatement;
 	}(Report_1.default));
@@ -510,7 +520,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var BalanceSheet = (function (_super) {
 	    __extends(BalanceSheet, _super);
 	    function BalanceSheet(coa) {
-	        var _this = _super.call(this, coa.assets.balance - coa.liabilities.balance, [coa.assets, coa.liabilities]) || this;
+	        var _this = _super.call(this, coa.assets.balance - coa.liabilities.balance, [coa.assets, coa.liabilities], [coa.equity]) || this;
 	        _this.coa = coa;
 	        _this._netWorth = 0;
 	        return _this;
@@ -521,7 +531,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        configurable: true
 	    });
 	    BalanceSheet.prototype.toString = function () {
-	        return this.print('Net Worth', [this.coa.equity]);
+	        return this.print('Net Worth', 'Equity');
 	    };
 	    return BalanceSheet;
 	}(Report_1.default));

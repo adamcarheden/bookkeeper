@@ -23,6 +23,7 @@ declare module 'BookKeeper/ChartOfAccounts' {
         readonly income: Account;
         readonly expenses: Account;
         readonly equity: Account;
+        readonly contraEquity: Account;
         constructor();
         toString(): string;
     }
@@ -150,8 +151,11 @@ declare module 'BookKeeper/Report' {
         readonly subAccounts: {
             [id: string]: Account;
         };
-        constructor(balance: number, accts: Account[]);
-        print(summary?: string, postTotalAccounts?: lineItem[]): string;
+        readonly equityAccounts: {
+            [id: string]: Account;
+        };
+        constructor(balance: number, accts: Account[], equityAccts: Account[]);
+        print(summary?: string, equity?: string): string;
         toString(): string;
     }
     export { Report as default, lineItem, printReport };
