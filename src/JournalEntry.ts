@@ -1,8 +1,8 @@
-import Account from './Account'
+import SubAccount from './SubAccount'
 
 export interface JournalEntryItem {
 	amount: number
-	account: Account
+	account: SubAccount
 }
 
 export default class JournalEntry {

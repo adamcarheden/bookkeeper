@@ -1,16 +1,33 @@
 import Account from './Account'
 import ChartOfAccounts from './ChartOfAccounts'
-import Report from './Report'
+import { AccountSnapshot, snapshotAccount, formatSnapshots } from './Report'
 
-export default class BalanceSheet extends Report {
+export default class BalanceSheet {
 
-	private _netWorth: number = 0
+	readonly assets: AccountSnapshot
+	readonly liabilities: AccountSnapshot 
+	readonly equity: AccountSnapshot
+	readonly netWorth: number
 
-	constructor(readonly coa: ChartOfAccounts) {
-		super(coa.assets.balance - coa.liabilities.balance, [coa.assets, coa.liabilities], [coa.equity])
+	constructor(coa: ChartOfAccounts) {
+		this.assets = snapshotAccount(coa.assets)
+		this.liabilities = snapshotAccount(coa.liabilities)
+		this.equity = snapshotAccount(coa.equity)
+		this.netWorth = this.assets.balance - this.liabilities.balance
 	}
-	get netWorth() { return this.balance }
 	toString() {
-		return this.print('Net Worth', 'Equity')
+		let report = formatSnapshots({
+			assets: [this.assets],
+			liabilities: [this.liabilities],
+			equity: [this.equity],
+		})
+		return `Assets:
+${report.assets.join('\n')}
+Liabilities:
+${report.liabilities.join('\n')}
+Net Worth: $${this.netWorth}
+Owner's Equity:
+${report.equity.join('\n')}
+`
 	}
 }

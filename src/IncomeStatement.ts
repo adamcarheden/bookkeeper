@@ -1,16 +1,33 @@
 import Account from './Account'
 import ChartOfAccounts from './ChartOfAccounts'
-import Report from './Report'
+import { AccountSnapshot, snapshotAccount, formatSnapshots } from './Report'
 
-export default class IncomeStatement extends Report {
+export default class IncomeStatement {
 
-	private _netIncome: number = 0
+	readonly income: AccountSnapshot
+	readonly expenses: AccountSnapshot 
+	readonly contraEquity: AccountSnapshot
+	readonly netIncome: number
 
 	constructor(coa: ChartOfAccounts) {
-		super(coa.income.balance - coa.expenses.balance, [coa.income, coa.expenses], [coa.contraEquity])
+		this.income = snapshotAccount(coa.income)
+		this.expenses = snapshotAccount(coa.expenses)
+		this.contraEquity = snapshotAccount(coa.contraEquity)
+		this.netIncome = this.income.balance - this.expenses.balance
 	}
-	get netIncome() { return this.balance }
 	toString() {
-		return this.print('Profit/(Loss)', 'Profits Taken')
+		let report = formatSnapshots({
+			income: [this.income],
+			expenses: [this.expenses],
+			contraEquity: [this.contraEquity],
+		})
+		return `Income:
+${report.income.join('\n')}
+Expenses:
+${report.expenses.join('\n')}
+Profit/(Loss): $${this.netIncome}
+Payments to/from Owners:
+${report.contraEquity.join('\n')}
+`
 	}
 }

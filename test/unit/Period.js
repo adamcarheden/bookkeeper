@@ -19,12 +19,11 @@ test(`Generate Financial Statements (${Path.basename(__filename)})`, (t) => {
 	const balanceSheet = p.balanceSheet
 	const incomeStatement = p.incomeStatement
 
-	console.error(`-= Journal =-\n${p}\n------------------------\n`)
-	console.error(`-= Chart of Accounts =-\n${coa}\n-----------------\n`)
+	console.log(`-= Journal =-\n${p}\n------------------------\n`)
+	console.log(`-= Chart of Accounts =-\n${coa}\n-----------------\n`)
 	console.log(`-= Income Statement =-\n${incomeStatement}\n----------------------\n`)
 	console.log(`-= Balance Sheet =-\n${balanceSheet}\n-----------------------------\n`)
 
-	t.equal(balanceSheet.balance, PAYCHECK, 'Balance sheet contains assets earned')
 	t.equal(balanceSheet.netWorth, coa.assets.balance - coa.liabilities.balance, 'Net Worth is assets - liabilities')
 
 	t.equal(incomeStatement.netIncome, roo, 'Net Income is income - expenses')

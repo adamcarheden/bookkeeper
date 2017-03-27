@@ -1,17 +1,17 @@
 const Path = require('path')
 import test from 'tape'
-import Account from '../BookKeeper/Account'
+import SubAccount from '../BookKeeper/SubAccount'
 import ACCOUNT_TYPE from '../BookKeeper/ACCOUNT_TYPE'
 import JournalEntry from '../BookKeeper/JournalEntry'
 
 let fixtures = function() {
 	return { 
-		to: new Account('to', ACCOUNT_TYPE.DEBIT_NORMAL),
-		from: new Account('from', ACCOUNT_TYPE.CREDIT_NORMAL),
-		to2: new Account('to2', ACCOUNT_TYPE.DEBIT_NORMAL),
-		from2: new Account('from2', ACCOUNT_TYPE.CREDIT_NORMAL),
-		to3: new Account('to3', ACCOUNT_TYPE.DEBIT_NORMAL),
-		from3: new Account('from3', ACCOUNT_TYPE.CREDIT_NORMAL),
+		to: new SubAccount('to', ACCOUNT_TYPE.DEBIT_NORMAL),
+		from: new SubAccount('from', ACCOUNT_TYPE.CREDIT_NORMAL),
+		to2: new SubAccount('to2', ACCOUNT_TYPE.DEBIT_NORMAL),
+		from2: new SubAccount('from2', ACCOUNT_TYPE.CREDIT_NORMAL),
+		to3: new SubAccount('to3', ACCOUNT_TYPE.DEBIT_NORMAL),
+		from3: new SubAccount('from3', ACCOUNT_TYPE.CREDIT_NORMAL),
 	}
 }
 

@@ -1,9 +1,8 @@
 import ChartOfAccounts from './ChartOfAccounts'
-import Account from './Account'
+import SubAccount from './SubAccount'
 import {default as JournalEntry, JournalEntryItem } from './JournalEntry'
 import IncomeStatement from './IncomeStatement'
 import BalanceSheet from './BalanceSheet'
-import FinancialStatements from './FinancialStatements'
 import ACCOUNT_TYPE from './ACCOUNT_TYPE'
 
 export type closeFunction = () => void
@@ -11,25 +10,11 @@ export default class Period {
 
 	journal: JournalEntry[] = []
 	autoClose: closeFunction
-	closed: boolean
-	financialStatements: FinancialStatements
+	closed: boolean = false
+	private _financialStatements: { balanceSheet: BalanceSheet|null , incomeStatement: IncomeStatement|null } = { balanceSheet: null, incomeStatement: null }
 
 	constructor(readonly period: any, readonly coa: ChartOfAccounts, autoClose?: closeFunction) {
-		this.autoClose = typeof autoClose === 'function'
-			? autoClose
-			: () => { 
-				let debits = [{amount: coa.income.balance, account: coa.income }]
-				let credits = [{amount: coa.expenses.balance, account: coa.expenses }]
-				let pnl = coa.income.balance - coa.expenses.balance
-				if (pnl > 0) {
-					credits.push({amount: pnl, account: coa.equity})
-				} else if (pnl < 0) {
-					if (coa.assets.balance < -pnl) throw new Error(`You're bankrupt!`)
-					debits.push({amount: pnl, account: coa.equity})
-				}
-				this.compoundJournalEntry('Close Period', debits, credits)
-			}
-		this.closed = false
+		this.autoClose = arguments.length >= 3 ? autoClose : () => { throw new Error(`You must either provide an autoClose function at instantiation or close explicitly prior to accessing financial statements`) }
 	}
 	close(closer?: closeFunction) {
 		const incomeStatement = new IncomeStatement(this.coa)
@@ -44,14 +29,14 @@ export default class Period {
 		}
 		const balanceSheet = new BalanceSheet(this.coa)
 		this.closed = true
-		this.financialStatements = new FinancialStatements(incomeStatement, balanceSheet)
+		this._financialStatements = { incomeStatement: incomeStatement, balanceSheet: balanceSheet }
 	}
 
 	journalEntry(
 		description: string,
 		amount: number,
-		debit: Account,
-		credit: Account
+		debit: SubAccount,
+		credit: SubAccount
 	) {
 		this.compoundJournalEntry(
 			description,
@@ -68,6 +53,7 @@ export default class Period {
 		this.journal.push(new JournalEntry(description, debits, credits))
 	}
 
+	get financialStatements() { return this._financialStatements }
 	get balanceSheet() {
 		if (this.closed === false) {
 			this.close(this.autoClose)
@@ -80,7 +66,6 @@ export default class Period {
 		}
 		return this.financialStatements.incomeStatement
 	}
-
 	printJournal() {
 		//               $xXXX,XXX.XX $xXXX,XXX.XX 
 		let journal: string[] = [`\t      Debits     Credits  Account`]

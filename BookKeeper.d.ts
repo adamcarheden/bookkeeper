@@ -15,15 +15,15 @@ declare module 'BookKeeper' {
 }
 
 declare module 'BookKeeper/ChartOfAccounts' {
-    import Account from 'BookKeeper/Account';
+    import SummaryAccount from 'BookKeeper/SummaryAccount';
     export default class ChartOfAccounts {
-        readonly generalLedger: Account;
-        readonly assets: Account;
-        readonly liabilities: Account;
-        readonly income: Account;
-        readonly expenses: Account;
-        readonly equity: Account;
-        readonly contraEquity: Account;
+        readonly assets: SummaryAccount;
+        readonly liabilities: SummaryAccount;
+        readonly income: SummaryAccount;
+        readonly expenses: SummaryAccount;
+        readonly equity: SummaryAccount;
+        readonly contraEquity: SummaryAccount;
+        readonly generalLedger: SummaryAccount;
         constructor();
         toString(): string;
     }
@@ -31,11 +31,10 @@ declare module 'BookKeeper/ChartOfAccounts' {
 
 declare module 'BookKeeper/Period' {
     import ChartOfAccounts from 'BookKeeper/ChartOfAccounts';
-    import Account from 'BookKeeper/Account';
+    import SubAccount from 'BookKeeper/SubAccount';
     import { default as JournalEntry, JournalEntryItem } from 'BookKeeper/JournalEntry';
     import IncomeStatement from 'BookKeeper/IncomeStatement';
     import BalanceSheet from 'BookKeeper/BalanceSheet';
-    import FinancialStatements from 'BookKeeper/FinancialStatements';
     export type closeFunction = () => void;
     export default class Period {
         readonly period: any;
@@ -43,11 +42,14 @@ declare module 'BookKeeper/Period' {
         journal: JournalEntry[];
         autoClose: closeFunction;
         closed: boolean;
-        financialStatements: FinancialStatements;
         constructor(period: any, coa: ChartOfAccounts, autoClose?: closeFunction);
         close(closer?: closeFunction): void;
-        journalEntry(description: string, amount: number, debit: Account, credit: Account): void;
+        journalEntry(description: string, amount: number, debit: SubAccount, credit: SubAccount): void;
         compoundJournalEntry(description: string, debits: JournalEntryItem[], credits: JournalEntryItem[]): void;
+        readonly financialStatements: {
+            balanceSheet: BalanceSheet;
+            incomeStatement: IncomeStatement;
+        };
         readonly balanceSheet: BalanceSheet;
         readonly incomeStatement: IncomeStatement;
         printJournal(): string;
@@ -71,32 +73,38 @@ declare module 'BookKeeper/ACCOUNT_TYPE' {
     export default ACCOUNT_TYPE;
 }
 
-declare module 'BookKeeper/Account' {
+declare module 'BookKeeper/SummaryAccount' {
     import ACCOUNT_TYPE from 'BookKeeper/ACCOUNT_TYPE';
-    export default class Account {
+    import Account from 'BookKeeper/Account';
+    import SubAccount from 'BookKeeper/SubAccount';
+    export default class SummaryAccount extends Account {
         readonly name: string;
-        readonly accountType: ACCOUNT_TYPE;
+        readonly defaultSubAccountType: ACCOUNT_TYPE;
         readonly subAccounts: Account[];
-        constructor(name: string, accountType: ACCOUNT_TYPE);
+        constructor(name: string, defaultSubAccountType: ACCOUNT_TYPE, subAccounts?: Account[]);
+        readonly debits: number[];
+        readonly credits: number[];
+        readonly balance: number;
+        subAccount(name: string, accountType?: ACCOUNT_TYPE): SubAccount;
+    }
+}
+
+declare module 'BookKeeper/SubAccount' {
+    import Account from 'BookKeeper/Account';
+    export default class SubAccount extends Account {
         debit(amount: number): void;
         readonly debits: number[];
-        readonly debit_total: number;
         credit(amount: number): void;
         readonly credits: number[];
-        readonly credit_total: number;
-        subAccount(name: string, accountType?: ACCOUNT_TYPE): Account;
         readonly balance: number;
-        readonly statement: any;
-        print(prefix?: string, indent?: string): string;
-        toString(): string;
     }
 }
 
 declare module 'BookKeeper/JournalEntry' {
-    import Account from 'BookKeeper/Account';
+    import SubAccount from 'BookKeeper/SubAccount';
     export interface JournalEntryItem {
         amount: number;
-        account: Account;
+        account: SubAccount;
     }
     export default class JournalEntry {
         readonly description: string;
@@ -110,54 +118,62 @@ declare module 'BookKeeper/JournalEntry' {
 
 declare module 'BookKeeper/IncomeStatement' {
     import ChartOfAccounts from 'BookKeeper/ChartOfAccounts';
-    import Report from 'BookKeeper/Report';
-    export default class IncomeStatement extends Report {
-        constructor(coa: ChartOfAccounts);
+    import { AccountSnapshot } from 'BookKeeper/Report';
+    export default class IncomeStatement {
+        readonly income: AccountSnapshot;
+        readonly expenses: AccountSnapshot;
+        readonly contraEquity: AccountSnapshot;
         readonly netIncome: number;
+        constructor(coa: ChartOfAccounts);
         toString(): string;
     }
 }
 
 declare module 'BookKeeper/BalanceSheet' {
     import ChartOfAccounts from 'BookKeeper/ChartOfAccounts';
-    import Report from 'BookKeeper/Report';
-    export default class BalanceSheet extends Report {
-        readonly coa: ChartOfAccounts;
-        constructor(coa: ChartOfAccounts);
+    import { AccountSnapshot } from 'BookKeeper/Report';
+    export default class BalanceSheet {
+        readonly assets: AccountSnapshot;
+        readonly liabilities: AccountSnapshot;
+        readonly equity: AccountSnapshot;
         readonly netWorth: number;
+        constructor(coa: ChartOfAccounts);
         toString(): string;
     }
 }
 
-declare module 'BookKeeper/FinancialStatements' {
-    import IncomeStatement from 'BookKeeper/IncomeStatement';
-    import BalanceSheet from 'BookKeeper/BalanceSheet';
-    export default class FinancialStatements {
-        readonly incomeStatement: IncomeStatement;
-        readonly balanceSheet: BalanceSheet;
-        constructor(incomeStatement: IncomeStatement, balanceSheet: BalanceSheet);
+declare module 'BookKeeper/Account' {
+    import ACCOUNT_TYPE from 'BookKeeper/ACCOUNT_TYPE';
+    abstract class Account {
+        readonly name: string;
+        readonly accountType: ACCOUNT_TYPE;
+        constructor(name: string, accountType: ACCOUNT_TYPE);
+        readonly abstract debits: number[];
+        readonly abstract credits: number[];
+        readonly abstract balance: number;
+        toString(): string;
+        print(): string;
     }
+    export default Account;
 }
 
 declare module 'BookKeeper/Report' {
     import Account from 'BookKeeper/Account';
-    interface lineItem {
+    interface AccountSnapshot {
         name: string;
         balance: number;
+        subAccounts: AccountSnapshot[];
     }
-    let printReport: (items: lineItem[]) => string;
-    abstract class Report {
-        readonly balance: number;
-        readonly subAccounts: {
-            [id: string]: Account;
-        };
-        readonly equityAccounts: {
-            [id: string]: Account;
-        };
-        constructor(balance: number, accts: Account[], equityAccts: Account[]);
-        print(summary?: string, equity?: string): string;
-        toString(): string;
-    }
-    export { Report as default, lineItem, printReport };
+    const snapshotAccount: (acct: Account) => {
+        name: string;
+        balance: number;
+        subAccounts: AccountSnapshot[];
+    };
+    const formatSnapshots: (accts: {
+        [id: string]: AccountSnapshot[];
+    }) => {
+        [id: string]: string[];
+    };
+    export { AccountSnapshot, snapshotAccount, formatSnapshots };
 }
 
