@@ -12,7 +12,7 @@ test(`${file}`, (t) => {
 	t.assert('equity' in coa, `Has equity`)
 	t.assert('income' in coa, `Has income`)
 	t.assert('expenses' in coa, `Has expenses`)
-	t.assert('contraEquity' in coa, `Has contraEquity`)
+	t.assert('changesToEquity' in coa, `Has changesToEquity`)
 
 	t.end()
 })

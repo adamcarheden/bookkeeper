@@ -7,7 +7,7 @@ var coa = new BookKeeper.ChartOfAccounts()
 // Equity
 var ownersEquity = coa.equity.subAccount('Owner\'s Equity')
 var retainedEarnings = coa.equity.subAccount('Retained Earnings')
-var draw = coa.contraEquity.subAccount('Owner\'s Draw')
+var draw = coa.changesToEquity.subAccount('Owner\'s Draw')
 // Assets
 var cash = coa.assets.subAccount('Cash')
 var inventory = coa.assets.subAccount('Inventory of Widgets')
@@ -29,16 +29,26 @@ var interest = coa.expenses.subAccount('Interest Expense')
 var cogs = coa.expenses.subAccount('Cost of Goods Sold')
 
 // Open the business
-var p0 = new BookKeeper.Period('0', coa)
+var p0 = new BookKeeper.Period(
+	'0',          // An arbitrary name for the period. BookKeeper itself doesn't use this at present
+	coa, () => {} // A function to close the period. (optional). It's called automatically if you access the income statement or balance sheet.
+)
 p0.journalEntry('Owner\'s Starting Capital', 10000, cash, ownersEquity)
 p0.journalEntry('Bank Loan', loan.amount, cash, loanPayable)
 console.log('-= Opening Balance =-\n'+p0.balanceSheet.toString()+'\n')
 /*
 -= Opening Balance =-
-Assets          $30,000.00
-Liabilities     $20,000.00
-Net Worth       $10,000.00
-Equity          $10,000.00
+Assets                         $ 30,000.00 
+  Cash                         $ 30,000.00 
+  Inventory of Widgets         $      0.00 
+  Acconts Receivable           $      0.00 
+Liabilities                    $ 20,000.00 
+  Accounts Payable             $      0.00 
+  Bank Loan (60 months @ 6.5%) $ 20,000.00 
+Net Worth                      $ 10,000.00 
+Equity                         $ 10,000.00 
+  Owner's Equity               $ 10,000.00 
+  Retained Earnings            $      0.00 
 */
 
 var p1 = new BookKeeper.Period('1', coa)
@@ -113,45 +123,56 @@ var close = function() {
 
 }
 p1.close(close)
-console.log('-= Results of first month of operation =-')
-console.log('Income Statement:\n'+p1.incomeStatement+'\n')
+console.log('=-=-=-=-= Results of first month of operation =-=-=-=-=')
+console.log('-= Income Statement =-\n'+p1.incomeStatement+'')
 /*
--= Results of first month of operation =-
-Income Statement:
-Income          $ 10,000.00 
-Expenses        $  8,608.33 
-Profit/(Loss)   $  1,391.67 
-Profits Taken   $  1,000.00 
+-= Income Statement =-
+Income               $ 10,000.00 
+  Sales              $ 10,000.00 
+  Income Summary     $      0.00 
+Expenses             $  8,608.33 
+  Rent               $  1,500.00 
+  Interest Expense   $    108.33 
+  Cost of Goods Sold $  7,000.00 
+Profit/(Loss):       $  1,391.67 
+Changes to Equity    $  1,000.00 
+  Owner's Draw       $  1,000.00
 */
-console.log('Balance Sheet:\n'+p1.balanceSheet+'\n')
+console.log('-= Balance Sheet =-\n'+p1.balanceSheet+'')
 /*
-Balance Sheet:
-Assets          $ 30,108.68 
-Liabilities     $ 19,717.01 
-Net Worth       $ 10,391.67 
-Equity          $ 10,391.67
+-= Balance Sheet =-
+Assets                         $ 30,108.68 
+  Cash                         $ 22,108.68 
+  Inventory of Widgets         $  1,000.00 
+  Acconts Receivable           $  7,000.00 
+Liabilities                    $ 19,717.01 
+  Accounts Payable             $      0.00 
+  Bank Loan (60 months @ 6.5%) $ 19,717.01 
+Net Worth                      $ 10,391.67 
+Equity                         $ 10,391.67 
+  Owner's Equity               $ 10,000.00 
+  Retained Earnings            $    391.67
 */
 console.log(`-= General Ledger =-\n${coa}`)
 /*
--= General Ledger =-
-GeneralLedger                   $ 60,217.36 
-  Assets                        $ 30,108.68 
-    Cash                        $ 22,108.68 
-    Inventory of Widgets        $  1,000.00 
-    Acconts Receivable          $  7,000.00 
-  Liabilities                   $ 19,717.01 
-    Accounts Payable            $      0.00 
-    Bank Loan (60 mo @ 6.5%)    $ 19,717.01 
-  Income                        $      0.00 
-    Sales                       $      0.00 
-    Income Summary              $      0.00 
-  Expenses                      $      0.00 
-    Rent                        $      0.00 
-    Interest Expense            $      0.00 
-    Cost of Goods Sold          $      0.00 
-  Equity                        $ 10,391.67 
-    Owner's Equity              $ 10,000.00 
-    Retained Earnings           $    391.67 
-  Contra Equity                 $      0.00 
-    Owner's Draw                $      0.00
+GeneralLedger                    $ 60,217.36 
+  Assets                         $ 30,108.68 
+    Cash                         $ 22,108.68 
+    Inventory of Widgets         $  1,000.00 
+    Acconts Receivable           $  7,000.00 
+  Liabilities                    $ 19,717.01 
+    Accounts Payable             $      0.00 
+    Bank Loan (60 months @ 6.5%) $ 19,717.01 
+  Equity                         $ 10,391.67 
+    Owner's Equity               $ 10,000.00 
+    Retained Earnings            $    391.67 
+  Income                         $      0.00 
+    Sales                        $      0.00 
+    Income Summary               $      0.00 
+  Expenses                       $      0.00 
+    Rent                         $      0.00 
+    Interest Expense             $      0.00 
+    Cost of Goods Sold           $      0.00 
+  Changes to Equity              $      0.00 
+    Owner's Draw                 $      0.00
 */

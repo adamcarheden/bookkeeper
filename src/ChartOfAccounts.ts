@@ -10,7 +10,7 @@ export default class ChartOfAccounts {
 	readonly income:        SummaryAccount
 	readonly expenses:      SummaryAccount
 	readonly equity:        SummaryAccount
-	readonly contraEquity:  SummaryAccount
+	readonly changesToEquity:  SummaryAccount
 	readonly generalLedger: SummaryAccount
 
 	constructor() { 
@@ -20,14 +20,14 @@ export default class ChartOfAccounts {
 		this.equity       = new SummaryAccount('Equity',        ACCOUNT_TYPE.CREDIT_NORMAL)
 		this.income       = new SummaryAccount('Income',        ACCOUNT_TYPE.CREDIT_NORMAL)
 		this.expenses     = new SummaryAccount('Expenses',      ACCOUNT_TYPE.DEBIT_NORMAL)
-		this.contraEquity = new SummaryAccount('Contra Equity', ACCOUNT_TYPE.DEBIT_NORMAL)
+		this.changesToEquity = new SummaryAccount('Changes to Equity', ACCOUNT_TYPE.DEBIT_NORMAL)
 		this.generalLedger = new SummaryAccount('GeneralLedger', ACCOUNT_TYPE.DEBIT_NORMAL, [
 			this.assets,
 			this.liabilities,
 			this.equity,
 			this.income,
 			this.expenses,
-			this.contraEquity,
+			this.changesToEquity,
 		])
 	}
 

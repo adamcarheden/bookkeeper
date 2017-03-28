@@ -1,6 +1,6 @@
 import Account from './Account'
 import ChartOfAccounts from './ChartOfAccounts'
-import { AccountSnapshot, snapshotAccount, formatSnapshots } from './Report'
+import { AccountSnapshot, snapshotAccount, snapshotBalance, formatSnapshots } from './Report'
 
 export default class BalanceSheet {
 
@@ -19,14 +19,12 @@ export default class BalanceSheet {
 		let report = formatSnapshots({
 			assets: [this.assets],
 			liabilities: [this.liabilities],
+			netWorth: [snapshotBalance('Net Worth', this.netWorth)],
 			equity: [this.equity],
 		})
-		return `Assets:
-${report.assets.join('\n')}
-Liabilities:
+		return `${report.assets.join('\n')}
 ${report.liabilities.join('\n')}
-Net Worth: $${this.netWorth}
-Owner's Equity:
+${report.netWorth.join('\n')}
 ${report.equity.join('\n')}
 `
 	}

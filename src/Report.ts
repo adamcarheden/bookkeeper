@@ -7,6 +7,14 @@ interface AccountSnapshot {
 	subAccounts: AccountSnapshot[]
 }
 
+const formatCurrency = function(amount: number): string { 
+	try {
+		return amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+	} catch (e) {
+		if (e.name !== 'RangeError') throw e
+	}
+	return amount.toFixed(2) 
+}
 const snapshotAccount = function(acct: Account): { name: string, balance: number, subAccounts: AccountSnapshot[] } {
 	let snapshot: AccountSnapshot = {
 		name: acct.name,
@@ -27,6 +35,14 @@ interface tmpAcct {
 	balance: number
 	balanceStr: string
 }
+const snapshotBalance = function(name: string, balance: number): AccountSnapshot {
+	let snapshot: AccountSnapshot = {
+		name: name,
+		balance: balance,
+		subAccounts: [],
+	}
+	return snapshot
+}
 
 const formatSnapshots = function(accts : { [id: string]: AccountSnapshot[] } ) : { [id: string]: string[] } {
 	let tmpAccts: { [id: string]: tmpAcct[]  } = {}
@@ -36,7 +52,7 @@ const formatSnapshots = function(accts : { [id: string]: AccountSnapshot[] } ) :
 
 		let makeTmp = function(acct: AccountSnapshot, indent = '') : void {
 			let bal = acct.balance
-			let a: tmpAcct = {name: indent+acct.name, balance: bal, balanceStr: bal.toFixed(2)}
+			let a: tmpAcct = {name: indent+acct.name, balance: bal, balanceStr: formatCurrency(bal)}
 			if (bal < 0) {
 				a.balanceStr = a.balanceStr.replace(/-/,'(')+ ')'
 			} else {
@@ -70,80 +86,10 @@ const formatSnapshots = function(accts : { [id: string]: AccountSnapshot[] } ) :
 	return fmtd
 }
 
-
-/*
-interface lineItem {
-	name: string,
-	balance: number,
-}
-let digits = function(num: number) {
-	return num.toFixed(2).split(/\./)[0].length
-}
-let printReport = function(items: lineItem[]) {
-	let max = 0
-	let balMax = 0
-	return items.map((item: lineItem) => {
-		let bal = item.balance.toLocaleString('en-US', {style: 'currency', currency: 'USD' })
-		bal = bal.replace(/\$/,'$ ')
-		if (item.balance < 0) {
-			bal = bal.replace(/-/,'').replace(/ /,'(') + ')'
-		} else {
-			bal = `${bal} `
-		}
-		let i = { 
-			name: item.name,
-			balance: bal,
-		}
-		max = Math.max(max, item.name.length)
-		balMax = Math.max(balMax, i.balance.length)
-		return i
-	}).map((item: { name: string, balance: string }) => {
-		let lbl = item.name
-		while (lbl.length < max) lbl += ' '
-		let padLen = balMax - item.balance.length
-		let pad = ''
-		while (pad.length < padLen) pad += ' '
-		let bal = item.balance.replace(/\$/,`$${pad}`)
-		return `${lbl.substring(0, max)}\t${bal}`
-	}).join(`\n`)
-}
-*/
-
-/*
-abstract class Report {
-
-	readonly subAccounts: { [id: string] : Account } = {}
-	readonly equityAccounts: { [id: string] : Account } = {}
-
-	constructor(readonly balance: number, accts: Account[], equityAccts: Account[]) {
-		for (let i in accts) {
-			this.subAccounts[accts[i].name] = accts[i].statement
-		}
-		for (let i in equityAccts) {
-			this.equityAccounts[equityAccts[i].name] = equityAccts[i].statement
-		}
-	}	
-
-	print(summary: string = 'Total', equity: string = 'Equity') {
-		let accts: lineItem[] = []
-		Object.keys(this.subAccounts).forEach((acct) => {
-			accts.push({name: acct, balance: this.subAccounts[acct].balance })
-		})
-		accts.push({ name: summary, balance: this.balance })
-		let eqSummary = 0
-		Object.keys(this.equityAccounts).forEach((acct) => {
-			eqSummary += this.equityAccounts[acct].balance
-		})
-		accts.push({ name: equity, balance: eqSummary })
-		return printReport(accts)
-	}
-	toString() {
-		return this.print()
-	}
-}
-*/
 export {
 	AccountSnapshot,
 	snapshotAccount,
+	snapshotBalance,
 	formatSnapshots,
+	formatCurrency,
 }

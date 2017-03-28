@@ -42,11 +42,11 @@ test(`Formats correctly (${file})`, (t) => {
 	})
 	console.log(res)
 	t.equal(res,`
-Assets                $(3900.00)
-  Accounts Receivable $(4000.00)
-  Cash                $  100.00 
-Expenses              $ 1100.00 
-  Cost of Goods Sold  $ 1100.00 
+Assets                $(3,900.00)
+  Accounts Receivable $(4,000.00)
+  Cash                $   100.00 
+Expenses              $ 1,100.00 
+  Cost of Goods Sold  $ 1,100.00 
 `,`Accounts properly aligned`)
 
 	t.end()

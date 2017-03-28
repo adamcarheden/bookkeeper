@@ -33,89 +33,141 @@ var BookKeeper = require('./BookKeeper').default
 var coa = new BookKeeper.ChartOfAccounts()
 
 // Period (2016 below) is an arbitrary value that you choose
-var period = new BookKeeper.Period('2016', coa)
+var period = new BookKeeper.Period('2017', coa)
+
+var cash = coa.assets.subAccount('Cash')
+var sales = coa.income.subAccount('Sales')
+var supplies = coa.expenses.subAccount('supplies')
+var incomeSummary = coa.income.subAccount('Income Summary')
+var retainedEarnings = coa.equity.subAccount('Retained Earnings')
 
 period.journalEntry(
-	'Sale', 
+	'Made a sale', 
 	100.00,     // The amount
-	coa.assets, // The account to debit
-	coa.income  // The account to credit
+	cash,       // The account to debit
+	sales,      // The account to credit
 )
 
 period.journalEntry(
-	'Supplies', 
-	50.00,     // The amount
-	coa.expenses, // The account to debit
-	coa.assets  // The account to credit
+	'Bought supplies', 
+	50.00,        // The amount
+	supplies,     // The account to debit
+	cash          // The account to credit
 )
 
 console.log(`-= Chart Of Accounts (Before close) =-\n${coa}\n`)
 /*
 -= Chart Of Accounts (Before close) =-
-GeneralLedger   $ 200.00 
-  Assets        $  50.00 
-  Liabilities   $   0.00 
-  Equity        $   0.00 
-  Income        $ 100.00 
-  Expenses      $  50.00 
-  Contra Equity $   0.00
+GeneralLedger         $ 200.00 
+  Assets              $  50.00 
+    Cash              $  50.00 
+  Liabilities         $   0.00 
+  Equity              $   0.00 
+    Retained Earnings $   0.00 
+  Income              $ 100.00 
+    Sales             $ 100.00 
+    Income Summary    $   0.00 
+  Expenses            $  50.00 
+    supplies          $  50.00 
+  Changes to Equity   $   0.0
 */
 console.log(`-= General Ledger (Before close) =-\n${period}\n`)
 /*
 -= General Ledger (Before close) =-
               Debits     Credits  Account
-Sale
-             $100.00              Assets
-                         $100.00  Income
+Made a sale
+             $100.00              Cash
+                         $100.00  Sales
 
-Supplies
-              $50.00              Expenses
-                          $50.00  Assets
+Bought supplies
+              $50.00              supplies
+                          $50.00  Cash
 */
-console.log(`-= Income Statement =-\n${period.incomeStatement}\n`)
+period.close(() => {
+	period.journalEntry(
+		'Close sales',
+		sales.balance, // The amount
+		sales,         // The account to debit
+		incomeSummary, // The account to credit
+	)
+	period.journalEntry(
+		'Close supplies',
+		supplies.balance, // The amount
+		incomeSummary,    // The account to debit
+		supplies          // The account to credit
+	)
+	period.journalEntry(
+		'Close income summary',
+		incomeSummary.balance, // The amount
+		incomeSummary,         // The account to debit
+		retainedEarnings,      // The account to credit
+	)
+})
+console.log(`-= Income Statement =-\n${period.incomeStatement}`)
 /*
 -= Income Statement =-
-Income          $ 100.00 
-Expenses        $  50.00 
-Profit/(Loss)   $  50.00 
-Profits Taken   $   0.00
+Income            $ 100.00 
+  Sales           $ 100.00 
+  Income Summary  $   0.00 
+Expenses          $  50.00 
+  supplies        $  50.00 
+Profit/(Loss):    $  50.00 
+Changes to Equity $   0.00
 */
-console.log(`-= Balance Sheet =-\n${period.balanceSheet}\n`)
+console.log(`-= Balance Sheet =-\n${period.balanceSheet}`)
 /*
 -= Balance Sheet =-
-Assets          $ 50.00 
-Liabilities     $  0.00 
-Net Worth       $ 50.00 
-Equity          $ 50.00
+Assets              $ 50.00 
+  Cash              $ 50.00 
+Liabilities         $  0.00 
+Net Worth           $ 50.00 
+Equity              $ 50.00 
+  Retained Earnings $ 50.00
 */
 console.log(`-= Chart Of Accounts (After close) =-\n${coa}\n`)
 /*
 -= Chart Of Accounts (After close) =-
-GeneralLedger   $ 100.00 
-  Assets        $  50.00 
-  Liabilities   $   0.00 
-  Equity        $  50.00 
-  Income        $   0.00 
-  Expenses      $   0.00 
-  Contra Equity $   0.00
+GeneralLedger         $ 100.00 
+  Assets              $  50.00 
+    Cash              $  50.00 
+  Liabilities         $   0.00 
+  Equity              $  50.00 
+    Retained Earnings $  50.00 
+  Income              $   0.00 
+    Sales             $   0.00 
+    Income Summary    $   0.00 
+  Expenses            $   0.00 
+    supplies          $   0.00 
+  Changes to Equity   $   0.00
 */
-console.log(`-= General Ledger (After close) =-\n${period}\n`)
+console.log(`-= General Ledger (After close) =-\n${period}`)
 /*
 -= General Ledger (After close) =-
               Debits     Credits  Account
-Sale
-             $100.00              Assets
-                         $100.00  Income
+Made a sale
+             $100.00              Cash
+                         $100.00  Sales
 
-Supplies
-              $50.00              Expenses
-                          $50.00  Assets
+Bought supplies
+              $50.00              supplies
+                          $50.00  Cash
 
-Close Period
-             $100.00              Income
-                          $50.00  Expenses
-                          $50.00  Equity
+Close sales
+             $100.00              Sales
+                         $100.00  Income Summary
+
+Close supplies
+              $50.00              Income Summary
+                          $50.00  supplies
+
+Close income summary
+              $50.00              Income Summary
+                          $50.00  Retained Earnings
 */
+// For programmers thinking thinking "for a simple example, this ain't so simple",
+// don't blame me, I didn't invent accounting.
+// For accountants thinking "No, no that's all wrong", stop being pedantic.
+// Accounting need not be that complicated.
 ```
 
 ### Complex example
@@ -130,7 +182,7 @@ var coa = new BookKeeper.ChartOfAccounts()
 // Equity
 var ownersEquity = coa.equity.subAccount('Owner\'s Equity')
 var retainedEarnings = coa.equity.subAccount('Retained Earnings')
-var draw = coa.contraEquity.subAccount('Owner\'s Draw')
+var draw = coa.changesToEquity.subAccount('Owner\'s Draw')
 // Assets
 var cash = coa.assets.subAccount('Cash')
 var inventory = coa.assets.subAccount('Inventory of Widgets')
@@ -152,16 +204,26 @@ var interest = coa.expenses.subAccount('Interest Expense')
 var cogs = coa.expenses.subAccount('Cost of Goods Sold')
 
 // Open the business
-var p0 = new BookKeeper.Period('0', coa)
+var p0 = new BookKeeper.Period(
+	'0',          // An arbitrary name for the period. BookKeeper itself doesn't use this at present
+	coa, () => {} // A function to close the period. (optional). It's called automatically if you access the income statement or balance sheet.
+)
 p0.journalEntry('Owner\'s Starting Capital', 10000, cash, ownersEquity)
 p0.journalEntry('Bank Loan', loan.amount, cash, loanPayable)
 console.log('-= Opening Balance =-\n'+p0.balanceSheet.toString()+'\n')
 /*
 -= Opening Balance =-
-Assets          $30,000.00
-Liabilities     $20,000.00
-Net Worth       $10,000.00
-Equity          $10,000.00
+Assets                         $ 30,000.00 
+  Cash                         $ 30,000.00 
+  Inventory of Widgets         $      0.00 
+  Acconts Receivable           $      0.00 
+Liabilities                    $ 20,000.00 
+  Accounts Payable             $      0.00 
+  Bank Loan (60 months @ 6.5%) $ 20,000.00 
+Net Worth                      $ 10,000.00 
+Equity                         $ 10,000.00 
+  Owner's Equity               $ 10,000.00 
+  Retained Earnings            $      0.00 
 */
 
 var p1 = new BookKeeper.Period('1', coa)
@@ -236,67 +298,78 @@ var close = function() {
 
 }
 p1.close(close)
-console.log('-= Results of first month of operation =-')
-console.log('Income Statement:\n'+p1.incomeStatement+'\n')
+console.log('=-=-=-=-= Results of first month of operation =-=-=-=-=')
+console.log('-= Income Statement =-\n'+p1.incomeStatement+'')
 /*
--= Results of first month of operation =-
-Income Statement:
-Income          $ 10,000.00 
-Expenses        $  8,608.33 
-Profit/(Loss)   $  1,391.67 
-Profits Taken   $  1,000.00 
+-= Income Statement =-
+Income               $ 10,000.00 
+  Sales              $ 10,000.00 
+  Income Summary     $      0.00 
+Expenses             $  8,608.33 
+  Rent               $  1,500.00 
+  Interest Expense   $    108.33 
+  Cost of Goods Sold $  7,000.00 
+Profit/(Loss):       $  1,391.67 
+Changes to Equity    $  1,000.00 
+  Owner's Draw       $  1,000.00
 */
-console.log('Balance Sheet:\n'+p1.balanceSheet+'\n')
+console.log('-= Balance Sheet =-\n'+p1.balanceSheet+'')
 /*
-Balance Sheet:
-Assets          $ 30,108.68 
-Liabilities     $ 19,717.01 
-Net Worth       $ 10,391.67 
-Equity          $ 10,391.67
+-= Balance Sheet =-
+Assets                         $ 30,108.68 
+  Cash                         $ 22,108.68 
+  Inventory of Widgets         $  1,000.00 
+  Acconts Receivable           $  7,000.00 
+Liabilities                    $ 19,717.01 
+  Accounts Payable             $      0.00 
+  Bank Loan (60 months @ 6.5%) $ 19,717.01 
+Net Worth                      $ 10,391.67 
+Equity                         $ 10,391.67 
+  Owner's Equity               $ 10,000.00 
+  Retained Earnings            $    391.67
 */
 console.log(`-= General Ledger =-\n${coa}`)
 /*
--= General Ledger =-
-GeneralLedger                   $ 60,217.36 
-  Assets                        $ 30,108.68 
-    Cash                        $ 22,108.68 
-    Inventory of Widgets        $  1,000.00 
-    Acconts Receivable          $  7,000.00 
-  Liabilities                   $ 19,717.01 
-    Accounts Payable            $      0.00 
-    Bank Loan (60 mo @ 6.5%)    $ 19,717.01 
-  Income                        $      0.00 
-    Sales                       $      0.00 
-    Income Summary              $      0.00 
-  Expenses                      $      0.00 
-    Rent                        $      0.00 
-    Interest Expense            $      0.00 
-    Cost of Goods Sold          $      0.00 
-  Equity                        $ 10,391.67 
-    Owner's Equity              $ 10,000.00 
-    Retained Earnings           $    391.67 
-  Contra Equity                 $      0.00 
-    Owner's Draw                $      0.00
+GeneralLedger                    $ 60,217.36 
+  Assets                         $ 30,108.68 
+    Cash                         $ 22,108.68 
+    Inventory of Widgets         $  1,000.00 
+    Acconts Receivable           $  7,000.00 
+  Liabilities                    $ 19,717.01 
+    Accounts Payable             $      0.00 
+    Bank Loan (60 months @ 6.5%) $ 19,717.01 
+  Equity                         $ 10,391.67 
+    Owner's Equity               $ 10,000.00 
+    Retained Earnings            $    391.67 
+  Income                         $      0.00 
+    Sales                        $      0.00 
+    Income Summary               $      0.00 
+  Expenses                       $      0.00 
+    Rent                         $      0.00 
+    Interest Expense             $      0.00 
+    Cost of Goods Sold           $      0.00 
+  Changes to Equity              $      0.00 
+    Owner's Draw                 $      0.00
 */
 ```
 
 ## Chart of Accounts
 The BookKeeper ChartOfAccounts object contains the following accounts by default:
 
-|Name        |Normal Balance|
-|------------|--------------|
-|assets      |Debit         |
-|liabilities |Credit        |
-|equity      |Credit        |
-|income      |Credit        |
-|expenses    |Debit         |
-|contraEquity|Debit         |
+|Name            |Normal Balance|
+|----------------|--------------|
+|assets          |Debit         |
+|liabilities     |Credit        |
+|equity          |Credit        |
+|income          |Credit        |
+|expenses        |Debit         |
+|changesToEquity |Debit         |
 
-Assets, liabilities and equity end up on the balance sheet. Income, expenses and contra equity (profit withdrawn) end up on the income statement.
+Assets, liabilities and equity end up on the balance sheet. Income, expenses and changes equity (investments and withdrawl of profits) end up on the income statement.
 
 ## Period End
 Prior to generating a period's financial statements you must close that period. Closing a period means:
-1. All temporary accounts (income, expenses and contra equity) must have a zero balance. This usually means a journal entry to transfer the balance to a balance sheet account.
+1. All temporary accounts (income, expenses and changes to equity) must have a zero balance. This usually means a journal entry to transfer the balance to a balance sheet account.
 2. No additional journal entries may be made for that period.
 
 You need not provide a closing function. Bookkeeper has a built-in one that does the right thing with it's default accounts. However, the whole point of accounting is a more granular tracking of how money flows through your business so you probably want to provide your own closing function that meets your reporting needs.

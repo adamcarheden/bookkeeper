@@ -22,7 +22,7 @@ declare module 'BookKeeper/ChartOfAccounts' {
         readonly income: SummaryAccount;
         readonly expenses: SummaryAccount;
         readonly equity: SummaryAccount;
-        readonly contraEquity: SummaryAccount;
+        readonly changesToEquity: SummaryAccount;
         readonly generalLedger: SummaryAccount;
         constructor();
         toString(): string;
@@ -122,7 +122,7 @@ declare module 'BookKeeper/IncomeStatement' {
     export default class IncomeStatement {
         readonly income: AccountSnapshot;
         readonly expenses: AccountSnapshot;
-        readonly contraEquity: AccountSnapshot;
+        readonly changesToEquity: AccountSnapshot;
         readonly netIncome: number;
         constructor(coa: ChartOfAccounts);
         toString(): string;
@@ -164,16 +164,18 @@ declare module 'BookKeeper/Report' {
         balance: number;
         subAccounts: AccountSnapshot[];
     }
+    const formatCurrency: (amount: number) => string;
     const snapshotAccount: (acct: Account) => {
         name: string;
         balance: number;
         subAccounts: AccountSnapshot[];
     };
+    const snapshotBalance: (name: string, balance: number) => AccountSnapshot;
     const formatSnapshots: (accts: {
         [id: string]: AccountSnapshot[];
     }) => {
         [id: string]: string[];
     };
-    export { AccountSnapshot, snapshotAccount, formatSnapshots };
+    export { AccountSnapshot, snapshotAccount, snapshotBalance, formatSnapshots, formatCurrency };
 }
 

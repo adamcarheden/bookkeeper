@@ -85,14 +85,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.equity = new SummaryAccount_1.default('Equity', ACCOUNT_TYPE_1.default.CREDIT_NORMAL);
 	        this.income = new SummaryAccount_1.default('Income', ACCOUNT_TYPE_1.default.CREDIT_NORMAL);
 	        this.expenses = new SummaryAccount_1.default('Expenses', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
-	        this.contraEquity = new SummaryAccount_1.default('Contra Equity', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
+	        this.changesToEquity = new SummaryAccount_1.default('Changes to Equity', ACCOUNT_TYPE_1.default.DEBIT_NORMAL);
 	        this.generalLedger = new SummaryAccount_1.default('GeneralLedger', ACCOUNT_TYPE_1.default.DEBIT_NORMAL, [
 	            this.assets,
 	            this.liabilities,
 	            this.equity,
 	            this.income,
 	            this.expenses,
-	            this.contraEquity,
+	            this.changesToEquity,
 	        ]);
 	    }
 	    ChartOfAccounts.prototype.toString = function () {
@@ -305,6 +305,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var SummaryAccount_1 = __webpack_require__(2);
+	var formatCurrency = function (amount) {
+	    try {
+	        return amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+	    }
+	    catch (e) {
+	        if (e.name !== 'RangeError')
+	            throw e;
+	    }
+	    return amount.toFixed(2);
+	};
+	exports.formatCurrency = formatCurrency;
 	var snapshotAccount = function (acct) {
 	    var snapshot = {
 	        name: acct.name,
@@ -320,6 +331,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return snapshot;
 	};
 	exports.snapshotAccount = snapshotAccount;
+	var snapshotBalance = function (name, balance) {
+	    var snapshot = {
+	        name: name,
+	        balance: balance,
+	        subAccounts: [],
+	    };
+	    return snapshot;
+	};
+	exports.snapshotBalance = snapshotBalance;
 	var formatSnapshots = function (accts) {
 	    var tmpAccts = {};
 	    var maxName = 0, maxBal = 0;
@@ -328,7 +348,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var makeTmp = function (acct, indent) {
 	            if (indent === void 0) { indent = ''; }
 	            var bal = acct.balance;
-	            var a = { name: indent + acct.name, balance: bal, balanceStr: bal.toFixed(2) };
+	            var a = { name: indent + acct.name, balance: bal, balanceStr: formatCurrency(bal) };
 	            if (bal < 0) {
 	                a.balanceStr = a.balanceStr.replace(/-/, '(') + ')';
 	            }
@@ -514,16 +534,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function IncomeStatement(coa) {
 	        this.income = Report_1.snapshotAccount(coa.income);
 	        this.expenses = Report_1.snapshotAccount(coa.expenses);
-	        this.contraEquity = Report_1.snapshotAccount(coa.contraEquity);
+	        this.changesToEquity = Report_1.snapshotAccount(coa.changesToEquity);
 	        this.netIncome = this.income.balance - this.expenses.balance;
 	    }
 	    IncomeStatement.prototype.toString = function () {
 	        var report = Report_1.formatSnapshots({
 	            income: [this.income],
 	            expenses: [this.expenses],
-	            contraEquity: [this.contraEquity],
+	            pnl: [Report_1.snapshotBalance('Profit/(Loss):', this.netIncome)],
+	            changesToEquity: [this.changesToEquity],
 	        });
-	        return "Income:\n" + report.income.join('\n') + "\nExpenses:\n" + report.expenses.join('\n') + "\nProfit/(Loss): $" + this.netIncome + "\nPayments to/from Owners:\n" + report.contraEquity.join('\n') + "\n";
+	        return report.income.join('\n') + "\n" + report.expenses.join('\n') + "\n" + report.pnl.join('\n') + "\n" + report.changesToEquity.join('\n') + "\n";
 	    };
 	    return IncomeStatement;
 	}());
@@ -548,9 +569,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var report = Report_1.formatSnapshots({
 	            assets: [this.assets],
 	            liabilities: [this.liabilities],
+	            netWorth: [Report_1.snapshotBalance('Net Worth', this.netWorth)],
 	            equity: [this.equity],
 	        });
-	        return "Assets:\n" + report.assets.join('\n') + "\nLiabilities:\n" + report.liabilities.join('\n') + "\nNet Worth: $" + this.netWorth + "\nOwner's Equity:\n" + report.equity.join('\n') + "\n";
+	        return report.assets.join('\n') + "\n" + report.liabilities.join('\n') + "\n" + report.netWorth.join('\n') + "\n" + report.equity.join('\n') + "\n";
 	    };
 	    return BalanceSheet;
 	}());
