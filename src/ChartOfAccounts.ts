@@ -1,19 +1,19 @@
-import SummaryAccount from './SummaryAccount'
 import Account from './Account'
 import ACCOUNT_TYPE from './ACCOUNT_TYPE'
 import Period from './Period'
-import {snapshotAccount, formatSnapshots} from './Report'
+import { formatSnapshots, snapshotAccount } from './Report'
+import SummaryAccount from './SummaryAccount'
 export default class ChartOfAccounts {
 
-	readonly assets:        SummaryAccount
-	readonly liabilities:   SummaryAccount
-	readonly income:        SummaryAccount
-	readonly expenses:      SummaryAccount
-	readonly equity:        SummaryAccount
-	readonly changesToEquity:  SummaryAccount
-	readonly generalLedger: SummaryAccount
+	public readonly assets: SummaryAccount
+	public readonly liabilities: SummaryAccount
+	public readonly income: SummaryAccount
+	public readonly expenses: SummaryAccount
+	public readonly equity: SummaryAccount
+	public readonly changesToEquity: SummaryAccount
+	public readonly generalLedger: SummaryAccount
 
-	constructor() { 
+	constructor() {
 		// https://en.wikipedia.org/wiki/Normal_balance
 		this.assets       = new SummaryAccount('Assets',        ACCOUNT_TYPE.DEBIT_NORMAL)
 		this.liabilities  = new SummaryAccount('Liabilities',   ACCOUNT_TYPE.CREDIT_NORMAL)
@@ -31,7 +31,7 @@ export default class ChartOfAccounts {
 		])
 	}
 
-	toString() {
+	public toString() {
 		let report = formatSnapshots({gl: [snapshotAccount(this.generalLedger)]})
 		return report.gl.join(`\n`)
 	}

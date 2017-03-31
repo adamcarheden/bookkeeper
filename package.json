@@ -1,10 +1,10 @@
 {
   "name": "bookkeeper",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Engine for financial bookkeeping",
   "main": "BookKeeper.js",
   "scripts": {
-    "lint": "eslint --ext .js src",
+    "lint": "tslint src/*.ts",
     "build": "rm -f BookKeeper.d.ts; webpack --config build/webpack.config.js && babili BookKeeper.js -o BookKeeper.min.js && dts-bundle --name BookKeeper --main src/BookKeeper.d.ts --out ../BookKeeper.d.ts --baseDir src/; rm src/*.d.ts",
     "lint-test": "eslint --ext .js test",
     "compile-testing": "rm -f test/BookKeeper/*.js && tsc src/*.ts --sourceMap --target ES2015 --outDir test/BookKeeper/",
@@ -18,10 +18,10 @@
     "name": "Adam Carheden",
     "email": "adam.carheden@gmail.com"
   },
-	"repository": {
+  "repository": {
     "type": "git",
     "url": "https://github.com/adamcarheden/bookkeeper"
-	},
+  },
   "license": "GPL-3.0",
   "devDependencies": {
     "babel-cli": "^6.18.0",

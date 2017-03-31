@@ -1,30 +1,26 @@
-import ACCOUNT_TYPE from './ACCOUNT_TYPE'
 import Account from './Account'
+import ACCOUNT_TYPE from './ACCOUNT_TYPE'
 import AccountEntry from './AccountEntry'
 
 export default class SubAccount extends Account {
 
-	private _debits: number[] = []
-	private _debit_total: number = 0
-	private _credits: number[] = []
-	private _credit_total: number = 0
-	private _balance: number = 0
+	public readonly debits: number[] = []
+	public readonly credits: number[] = []
+	private debitTotal: number = 0
+	private creditTotal: number = 0
+	private cachedBalance: number = 0
 
-	debit(amount: number) {
-		this._debits.push(amount)
-		this._debit_total += amount
-		this._balance += (this.accountType === ACCOUNT_TYPE.DEBIT_NORMAL) ? amount : -amount
+	public debit(amount: number) {
+		this.debits.push(amount)
+		this.debitTotal += amount
+		this.cachedBalance += (this.accountType === ACCOUNT_TYPE.DEBIT_NORMAL) ? amount : -amount
 	}
-	get debits() : number[] {
-		return this._debits
+	public credit(amount: number) {
+		this.credits.push(amount)
+		this.creditTotal += amount
+		this.cachedBalance += (this.accountType === ACCOUNT_TYPE.CREDIT_NORMAL) ? amount : -amount
 	}
-	credit(amount: number) {
-		this._credits.push(amount)
-		this._credit_total += amount
-		this._balance += (this.accountType === ACCOUNT_TYPE.CREDIT_NORMAL) ? amount : -amount
+	get balance() {
+		return this.cachedBalance
 	}
-	get credits() : number[] {
-		return this._credits
-	}
-	get balance() : number { return this._balance }
 }

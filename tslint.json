@@ -1,5 +1,10 @@
 {
+	"extends": "tslint:recommended",
   "rules": {
-    "quotemark": [ true, "single" ]
+    "quotemark": [ true, "single" ],
+		"semicolon": [ true, "never" ],
+		"indent": [ true, "tabs" ],
+		"interface-name": false,
+		"max-line-length": false
   }
 }

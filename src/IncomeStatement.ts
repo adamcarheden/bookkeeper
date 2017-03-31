@@ -1,13 +1,13 @@
 import Account from './Account'
 import ChartOfAccounts from './ChartOfAccounts'
-import { AccountSnapshot, snapshotAccount, snapshotBalance, formatSnapshots } from './Report'
+import { AccountSnapshot, formatSnapshots, snapshotAccount, snapshotBalance } from './Report'
 
 export default class IncomeStatement {
 
-	readonly income: AccountSnapshot
-	readonly expenses: AccountSnapshot 
-	readonly changesToEquity: AccountSnapshot
-	readonly netIncome: number
+	public readonly income: AccountSnapshot
+	public readonly expenses: AccountSnapshot
+	public readonly changesToEquity: AccountSnapshot
+	public readonly netIncome: number
 
 	constructor(coa: ChartOfAccounts) {
 		this.income = snapshotAccount(coa.income)
@@ -15,12 +15,12 @@ export default class IncomeStatement {
 		this.changesToEquity = snapshotAccount(coa.changesToEquity)
 		this.netIncome = this.income.balance - this.expenses.balance
 	}
-	toString() {
+	public toString() {
 		let report = formatSnapshots({
-			income: [this.income],
-			expenses: [this.expenses],
-			pnl: [snapshotBalance('Profit/(Loss):', this.netIncome)],
 			changesToEquity: [this.changesToEquity],
+			expenses: [this.expenses],
+			income: [this.income],
+			pnl: [snapshotBalance('Profit/(Loss):', this.netIncome)],
 		})
 		return `${report.income.join('\n')}
 ${report.expenses.join('\n')}
