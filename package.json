@@ -4,7 +4,7 @@
   "description": "Engine for financial bookkeeping",
   "main": "BookKeeper.js",
   "scripts": {
-    "lint": "tslint src/*.ts",
+    "lint": "tslint $(find src/ -name '*.ts' -a ! -name '*.d.ts')",
     "build": "rm -f BookKeeper.d.ts; webpack --config build/webpack.config.js && babili BookKeeper.js -o BookKeeper.min.js && dts-bundle --name BookKeeper --main src/BookKeeper.d.ts --out ../BookKeeper.d.ts --baseDir src/; rm src/*.d.ts",
     "lint-test": "eslint --ext .js test",
     "compile-testing": "rm -f test/BookKeeper/*.js && tsc src/*.ts --sourceMap --target ES2015 --outDir test/BookKeeper/",
