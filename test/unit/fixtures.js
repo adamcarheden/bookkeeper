@@ -1,5 +1,5 @@
 import test from 'tape'
-import BookKeeper from '../BookKeeper/BookKeeper'
+import { ChartOfAccounts, Period } from '../BookKeeper/BookKeeper'
 
 const setup = () => {
 	return {}
@@ -23,7 +23,8 @@ const randDollarArr = function(min, max, count) {
 export {
 	setup,
 	test,
-	BookKeeper,
+	ChartOfAccounts,
 	randInt,
 	randDollarArr,
+	Period,
 }

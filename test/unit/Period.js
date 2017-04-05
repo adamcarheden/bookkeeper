@@ -1,15 +1,15 @@
 const Path = require('path')
-import { test, BookKeeper } from './fixtures'
+import { ChartOfAccounts, Period, test } from './fixtures'
 
 test(`Generate Financial Statements (${Path.basename(__filename)})`, (t) => {
 
 	const PAYCHECK = 1099.99
 
-	const coa = new BookKeeper.ChartOfAccounts()
+	const coa = new ChartOfAccounts()
 	const wages = coa.income.subAccount('Wages')
 	const checking = coa.assets.subAccount('Checking')
 	const earnings = coa.equity.subAccount('Retained Earnings')
-	const p = new BookKeeper.Period(2016, coa, function(period) {
+	const p = new Period(2016, coa, function(period) {
 		p.journalEntry('Close Wages', wages.balance, wages, earnings)
 	})
 	p.journalEntry('Payday', PAYCHECK, checking, wages)

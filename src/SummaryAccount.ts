@@ -25,8 +25,13 @@ export default class SummaryAccount extends Account {
 			return acc + ((subAcct instanceof SubAccount && subAcct.accountType !== this.accountType) ? -subAcct.balance : subAcct.balance)
 		}, 0)
 	}
-	public subAccount(name: string, accountType: ACCOUNT_TYPE = this.accountType) {
-		let sub = new SubAccount(name, accountType)
+	public subAccount(name: string, isSummary: boolean = false, accountType: ACCOUNT_TYPE = this.accountType) {
+		let sub
+		if (isSummary) {
+			sub = new SummaryAccount(name, accountType)
+		} else {
+			sub = new SubAccount(name, accountType)
+		}
 		this.subAccounts.push(sub)
 		return sub
 	}

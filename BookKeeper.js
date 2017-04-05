@@ -57,15 +57,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var ACCOUNT_TYPE_1 = __webpack_require__(1);
+	exports.ACCOUNT_TYPE = ACCOUNT_TYPE_1.default;
 	var BankruptError_1 = __webpack_require__(2);
+	exports.BankruptError = BankruptError_1.default;
 	var ChartOfAccounts_1 = __webpack_require__(3);
+	exports.ChartOfAccounts = ChartOfAccounts_1.default;
 	var Period_1 = __webpack_require__(8);
-	exports.default = {
-	    ACCOUNT_TYPE: ACCOUNT_TYPE_1.default,
-	    BankruptError: BankruptError_1.default,
-	    ChartOfAccounts: ChartOfAccounts_1.default,
-	    Period: Period_1.default,
-	};
+	exports.Period = Period_1.default;
 
 
 /***/ },
@@ -297,9 +295,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        enumerable: true,
 	        configurable: true
 	    });
-	    SummaryAccount.prototype.subAccount = function (name, accountType) {
+	    SummaryAccount.prototype.subAccount = function (name, isSummary, accountType) {
+	        if (isSummary === void 0) { isSummary = false; }
 	        if (accountType === void 0) { accountType = this.accountType; }
-	        var sub = new SubAccount_1.default(name, accountType);
+	        var sub;
+	        if (isSummary) {
+	            sub = new SummaryAccount(name, accountType);
+	        }
+	        else {
+	            sub = new SubAccount_1.default(name, accountType);
+	        }
 	        this.subAccounts.push(sub);
 	        return sub;
 	    };

@@ -3,7 +3,7 @@ import BankruptError from './BankruptError'
 import ChartOfAccounts from './ChartOfAccounts'
 import Period from './Period'
 
-export default {
+export {
 	ACCOUNT_TYPE,
 	BankruptError,
 	ChartOfAccounts,

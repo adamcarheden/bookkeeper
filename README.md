@@ -28,7 +28,7 @@ git clone https://github.com/adamcarheden/bookkeeper.git
 ### Basic
 _*basic.js*_
 ```javascript
-var BookKeeper = require('./BookKeeper').default
+var BookKeeper = require('./BookKeeper')
 
 var coa = new BookKeeper.ChartOfAccounts()
 
@@ -173,7 +173,7 @@ Close income summary
 ### Complex example
 _*complex.js*_
 ```javascript
-var BookKeeper = require('./BookKeeper').default
+var BookKeeper = require('./BookKeeper')
 
 var coa = new BookKeeper.ChartOfAccounts()
 

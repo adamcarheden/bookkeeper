@@ -1,4 +1,4 @@
-var BookKeeper = require('./BookKeeper').default
+var BookKeeper = require('./BookKeeper')
 
 var coa = new BookKeeper.ChartOfAccounts()
 

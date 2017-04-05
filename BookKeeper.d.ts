@@ -5,13 +5,7 @@ declare module 'BookKeeper' {
     import BankruptError from 'BookKeeper/BankruptError';
     import ChartOfAccounts from 'BookKeeper/ChartOfAccounts';
     import Period from 'BookKeeper/Period';
-    var _default: {
-        ACCOUNT_TYPE: typeof ACCOUNT_TYPE;
-        BankruptError: typeof BankruptError;
-        ChartOfAccounts: typeof ChartOfAccounts;
-        Period: typeof Period;
-    };
-    export default _default;
+    export { ACCOUNT_TYPE, BankruptError, ChartOfAccounts, Period };
 }
 
 declare module 'BookKeeper/ACCOUNT_TYPE' {
@@ -85,7 +79,7 @@ declare module 'BookKeeper/SummaryAccount' {
         readonly debits: number[];
         readonly credits: number[];
         readonly balance: number;
-        subAccount(name: string, accountType?: ACCOUNT_TYPE): SubAccount;
+        subAccount(name: string, isSummary?: boolean, accountType?: ACCOUNT_TYPE): SummaryAccount | SubAccount;
     }
 }
 

@@ -3,6 +3,7 @@
   "version": "0.2.1",
   "description": "Engine for financial bookkeeping",
   "main": "BookKeeper.js",
+  "types": "BookKeeper.d.ts",
   "scripts": {
     "lint": "tslint $(find src/ -name '*.ts' -a ! -name '*.d.ts')",
     "build": "rm -f BookKeeper.d.ts; webpack --config build/webpack.config.js && babili BookKeeper.js -o BookKeeper.min.js && dts-bundle --name BookKeeper --main src/BookKeeper.d.ts --out ../BookKeeper.d.ts --baseDir src/; rm src/*.d.ts",
@@ -50,7 +51,7 @@
     "ts-loader": "^2.0.1",
     "tslint": "^4.5.1",
     "tslint-loader": "^3.4.2",
-    "typescript": "^2.2.1",
+    "typescript": "^2.2.2",
     "webpack": "^1.13.3"
   },
   "dependencies": {}
