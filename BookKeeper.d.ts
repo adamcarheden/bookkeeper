@@ -80,6 +80,7 @@ declare module 'BookKeeper/SummaryAccount' {
         readonly credits: number[];
         readonly balance: number;
         subAccount(name: string, isSummary?: boolean, accountType?: ACCOUNT_TYPE): SummaryAccount | SubAccount;
+        eachAccount(fun: (acct: Account) => any): void;
     }
 }
 
@@ -157,13 +158,12 @@ declare module 'BookKeeper/Report' {
         name: string;
         balance: number;
         subAccounts: AccountSnapshot[];
+        subAccountsByName: {
+            [id: string]: AccountSnapshot;
+        };
     }
     const formatCurrency: (amount: number) => string;
-    const snapshotAccount: (acct: Account) => {
-        name: string;
-        balance: number;
-        subAccounts: AccountSnapshot[];
-    };
+    const snapshotAccount: (acct: Account) => AccountSnapshot;
     const snapshotBalance: (name: string, balance: number) => AccountSnapshot;
     const formatSnapshots: (accts: {
         [id: string]: AccountSnapshot[];

@@ -5,6 +5,7 @@ interface AccountSnapshot {
 	name: string
 	balance: number
 	subAccounts: AccountSnapshot[]
+	subAccountsByName: { [id: string]: AccountSnapshot}
 }
 
 const formatCurrency = (amount: number): string => {
@@ -15,16 +16,19 @@ const formatCurrency = (amount: number): string => {
 	}
 	return amount.toFixed(2)
 }
-const snapshotAccount = (acct: Account): { name: string, balance: number, subAccounts: AccountSnapshot[] } => {
+const snapshotAccount = (acct: Account): AccountSnapshot => {
 	let snapshot: AccountSnapshot = {
 		balance: acct.balance,
 		name: acct.name,
 		subAccounts: [],
+		subAccountsByName: {},
 	}
 	if (acct instanceof SummaryAccount) {
 		let sa = acct as SummaryAccount
 		for (let i of sa.subAccounts) {
-			snapshot.subAccounts.push(snapshotAccount(i))
+			let sub = snapshotAccount(i)
+			snapshot.subAccounts.push(sub)
+			snapshot.subAccountsByName[i.name] = sub
 		}
 	}
 	return snapshot
@@ -40,6 +44,7 @@ const snapshotBalance = (name: string, balance: number): AccountSnapshot => {
 		name,
 		balance,
 		subAccounts: [],
+		subAccountsByName: {},
 	}
 	return snapshot
 }

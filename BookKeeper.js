@@ -168,12 +168,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        balance: acct.balance,
 	        name: acct.name,
 	        subAccounts: [],
+	        subAccountsByName: {},
 	    };
 	    if (acct instanceof SummaryAccount_1.default) {
 	        var sa = acct;
 	        for (var _i = 0, _a = sa.subAccounts; _i < _a.length; _i++) {
 	            var i = _a[_i];
-	            snapshot.subAccounts.push(snapshotAccount(i));
+	            var sub = snapshotAccount(i);
+	            snapshot.subAccounts.push(sub);
+	            snapshot.subAccountsByName[i.name] = sub;
 	        }
 	    }
 	    return snapshot;
@@ -184,6 +187,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        name: name,
 	        balance: balance,
 	        subAccounts: [],
+	        subAccountsByName: {},
 	    };
 	    return snapshot;
 	};
@@ -307,6 +311,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        this.subAccounts.push(sub);
 	        return sub;
+	    };
+	    SummaryAccount.prototype.eachAccount = function (fun) {
+	        for (var _i = 0, _a = this.subAccounts; _i < _a.length; _i++) {
+	            var acct = _a[_i];
+	            if (acct instanceof SummaryAccount) {
+	                var sa = acct;
+	                sa.eachAccount(fun);
+	            }
+	            else {
+	                fun(acct);
+	            }
+	        }
 	    };
 	    return SummaryAccount;
 	}(Account_1.default));

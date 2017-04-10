@@ -35,4 +35,14 @@ export default class SummaryAccount extends Account {
 		this.subAccounts.push(sub)
 		return sub
 	}
+	public eachAccount(fun: (acct: Account) => any) {
+		for (let acct of this.subAccounts) {
+			if (acct instanceof SummaryAccount) {
+				let sa = acct as SummaryAccount
+				sa.eachAccount(fun)
+			} else {
+				fun(acct)
+			}
+		}
+	}
 }

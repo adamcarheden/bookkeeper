@@ -5,6 +5,21 @@ import {snapshotAccount, formatSnapshots} from '../BookKeeper/Report'
 import ACCOUNT_TYPE from '../BookKeeper/ACCOUNT_TYPE'
 const file = Path.basename(__filename)
 
+test(`SubAccountsByName and subAccounts match (${file})`, (t) => {
+
+	// Create some accounts
+	let assets = new SummaryAccount('Assets', ACCOUNT_TYPE.DEBIT_NORMAL)
+	let ar = assets.subAccount('Accounts Receivable') // eslint-disable-line no-unused-vars
+	let cash = assets.subAccount('Cash') // eslint-disable-line no-unused-vars
+	let snap = snapshotAccount(assets)
+
+	t.equal(2, snap.subAccounts.length, `subAccounts has 2 records`)
+	t.equal(2, Object.keys(snap.subAccountsByName).length, `subAccountsByName has 2 records`)
+	for (let a of snap.subAccounts) {
+		t.equal(a, snap.subAccountsByName[a.name],`account '${a.name}' exists in both subAccountsand subAccountsByName`)
+	}
+	t.end()
+})
 test(`Formats correctly (${file})`, (t) => {
 
 	// Create some accounts
